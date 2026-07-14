@@ -3,6 +3,11 @@ const cors = require("cors");
 const helmet = require("helmet")
 const compression = require("compression")
 const morgan = require("morgan")
+const cookieParser = require("cookie-parser")
+const errorHandler = require("./middlewares/errorHandler")
+const authRoutes = require("./routes/auth.routes");
+
+console.log("✅ app.js Loaded");
 
 const app = express();
 
@@ -14,7 +19,9 @@ app.use(helmet())
 app.use(compression());
 
 // Cors
+app.use(cookieParser());
 app.use(cors());
+
 
 // Body Parser 
 
@@ -30,5 +37,9 @@ app.get("/", (req , res) => {
         message: "SY Digital Backend is running successfully"
     });
 });
+
+app.use("/api/auth", authRoutes);
+
+app.use(errorHandler)
 
 module.exports = app;
