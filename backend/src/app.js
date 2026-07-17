@@ -12,6 +12,10 @@ const projectRoutes = require("./routes/project.routes");
 const blogRoutes = require("./routes/blog.routes");
 const meetingRoutes = require("./routes/meeting.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
+const paymentRoutes = require("./routes/payment.routes");
+const reviewRoutes = require("./routes/review.routes");
+const messageRoutes = require("./routes/message.routes");
+
 
 console.log("✅ app.js Loaded");
 
@@ -51,6 +55,9 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/meetings", meetingRoutes);
 app.use("/api/admin/dashboard", dashboardRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/messages", messageRoutes);
 
 
 
