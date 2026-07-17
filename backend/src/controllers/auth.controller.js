@@ -33,7 +33,22 @@ const login = async (req, res, next) => {
     }
 };
 
+const getProfile = async (req, res, next) => {
+    try {
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "Profile fetched successfully",
+                req.user
+            )
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     register,
     login,
+    getProfile,
 };

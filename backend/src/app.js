@@ -6,6 +6,12 @@ const morgan = require("morgan")
 const cookieParser = require("cookie-parser")
 const errorHandler = require("./middlewares/errorHandler")
 const authRoutes = require("./routes/auth.routes");
+const uploadRoutes = require("./routes/upload.routes");
+const serviceRoutes = require("./routes/service.routes");
+const projectRoutes = require("./routes/project.routes");
+const blogRoutes = require("./routes/blog.routes");
+const meetingRoutes = require("./routes/meeting.routes");
+const dashboardRoutes = require("./routes/dashboard.routes");
 
 console.log("✅ app.js Loaded");
 
@@ -39,6 +45,14 @@ app.get("/", (req , res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/services", serviceRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/blogs", blogRoutes);
+app.use("/api/meetings", meetingRoutes);
+app.use("/api/admin/dashboard", dashboardRoutes);
+
+
 
 app.use(errorHandler)
 
