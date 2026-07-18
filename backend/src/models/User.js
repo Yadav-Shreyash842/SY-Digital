@@ -29,15 +29,17 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
-    phone: {
-      type: String,
-      default: "",
-    },
+  phone: {
+    type: String,
+    trim: true,
+    default: "",
+     }  ,
 
-    avatar: {
-      type: String,
-      default: "",
-    },
+   avatar: {
+    type: String,
+    trim: true,
+    default: "",
+},
 
     role: {
       type: String,
@@ -50,14 +52,27 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
-    googleId: {
-      type: String,
-      default: "",
-    },
+   googleId: {
+    type: String,
+    trim: true,
+    default: "",
+},
   },
   {
     timestamps: true,
   }
 );
+
+userSchema.virtual("fullName").get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+userSchema.set("toJSON", {
+  transform: function (doc, ret) {
+    delete ret.password;
+    delete ret.__v;
+    return ret;
+  },
+});
 
 module.exports = mongoose.model("User", userSchema);

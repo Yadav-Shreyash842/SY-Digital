@@ -31,6 +31,16 @@ router.post(
 );
 
 router.get(
+    "/",
+    getAll
+);
+
+router.get(
+    "/featured",
+    getFeatured
+);
+
+router.get(
     "/:slug",
     getOne
 );
@@ -47,11 +57,6 @@ router.delete(
     auth,
     authorize(ROLES.ADMIN),
     remove
-);
-
-router.get(
-    "/featured",
-    getFeatured
 );
 
 module.exports = router;

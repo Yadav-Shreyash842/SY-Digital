@@ -49,10 +49,11 @@ const meetingSchema = new mongoose.Schema(
             required: true,
         },
 
-        duration: {
-            type: Number,
-            default: 30,
-        },
+      duration: {
+    type: Number,
+    default: 30,
+    min: 15,
+},
 
         // Project Information
         projectRequirements: {
@@ -67,16 +68,18 @@ const meetingSchema = new mongoose.Schema(
         },
 
         // Online Meeting
-        meetingLink: {
-            type: String,
-            default: "",
-        },
+       meetingLink: {
+    type: String,
+    trim: true,
+    default: "",
+},
 
         // Offline Meeting
-        officeAddress: {
-            type: String,
-            default: "",
-        },
+       officeAddress: {
+    type: String,
+    trim: true,
+    default: "",
+},
 
         // Meeting Status
         status: {
@@ -91,15 +94,17 @@ const meetingSchema = new mongoose.Schema(
             default: "pending",
         },
 
-        adminNotes: {
-            type: String,
-            default: "",
-        },
+       adminNotes: {
+    type: String,
+    trim: true,
+    default: "",
+},
 
-        cancellationReason: {
-            type: String,
-            default: "",
-        },
+       cancellationReason: {
+    type: String,
+    trim: true,
+    default: "",
+},
 
         cancelledAt: {
             type: Date,
@@ -108,13 +113,22 @@ const meetingSchema = new mongoose.Schema(
 
         history: [
     {
-        action: {
-            type: String,
-            required: true,
-        },
+      action: {
+    type: String,
+    enum: [
+        "created",
+        "approved",
+        "completed",
+        "cancelled",
+        "rejected",
+        "updated",
+    ],
+    required: true,
+},
 
         description: {
             type: String,
+            trim: true,
             default: "",
         },
 
@@ -136,7 +150,21 @@ const meetingSchema = new mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model(
-    "Meeting",
-    meetingSchema
-);
+meetingSchema.index({ status: 1 });
+meetingSchema.index({ meetingDate: 1 });
+meetingSchema.index({ service: 1 });
+meetingSchema.index({ createdBy: 1 });
+
+meetingSchema.index({
+    status: 1,
+    meetingDate: 1,
+});
+
+meetingSchema.set("toJSON", {
+    transform: function (doc, ret) {
+        delete ret.__v;
+        return ret;
+    },
+});
+
+module.exports = mongoose.model("Meeting", meetingSchema);

@@ -48,17 +48,29 @@ const projectSchema = new mongoose.Schema(
             },
         ],
 
-        images: [
-            {
-                publicId: String,
-                url: String,
-            },
-        ],
-
-        video: {
-            publicId: String,
-            url: String,
+      images: [
+    {
+        publicId: {
+            type: String,
+            default: "",
         },
+        url: {
+            type: String,
+            default: "",
+        },
+    },
+],
+
+       video: {
+    publicId: {
+        type: String,
+        default: "",
+    },
+    url: {
+        type: String,
+        default: "",
+    },
+},
 
         githubUrl: {
             type: String,
@@ -101,6 +113,25 @@ const projectSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
+
+projectSchema.index({ category: 1 });
+projectSchema.index({ status: 1 });
+projectSchema.index({ isFeatured: 1 });
+projectSchema.index({ createdBy: 1 });
+
+projectSchema.index({
+    title: "text",
+    shortDescription: "text",
+    description: "text",
+    clientName: "text",
+});
+
+projectSchema.set("toJSON", {
+    transform: function (doc, ret) {
+        delete ret.__v;
+        return ret;
+    },
+});
 
 module.exports = mongoose.model(
     "Project",

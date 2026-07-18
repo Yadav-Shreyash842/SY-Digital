@@ -5,7 +5,9 @@ const projectValidator = [
     body("title")
         .trim()
         .notEmpty()
-        .withMessage("Project title is required"),
+        .withMessage("Project title is required")
+        .isLength({ min: 3, max: 120 })
+        .withMessage("Project title must be between 3 and 120 characters"),
 
     body("shortDescription")
         .trim()
@@ -22,7 +24,9 @@ const projectValidator = [
     body("category")
         .trim()
         .notEmpty()
-        .withMessage("Category is required"),
+        .withMessage("Category is required")
+        .isLength({ max: 50 })
+        .withMessage("Category cannot exceed 50 characters"),
 
 ];
 

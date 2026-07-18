@@ -1,10 +1,13 @@
-const express = require ("express");
+const express = require("express");
 const cors = require("cors");
-const helmet = require("helmet")
-const compression = require("compression")
-const morgan = require("morgan")
-const cookieParser = require("cookie-parser")
-const errorHandler = require("./middlewares/errorHandler")
+const helmet = require("helmet");
+const compression = require("compression");
+const morgan = require("morgan");
+const mongoSanitize = require("express-mongo-sanitize");
+const rateLimiter = require("./middlewares/rateLimiter");
+const hpp = require("hpp");
+const cookieParser = require("cookie-parser");
+const errorHandler = require("./middlewares/errorHandler");
 const authRoutes = require("./routes/auth.routes");
 const uploadRoutes = require("./routes/upload.routes");
 const serviceRoutes = require("./routes/service.routes");
@@ -15,38 +18,73 @@ const dashboardRoutes = require("./routes/dashboard.routes");
 const paymentRoutes = require("./routes/payment.routes");
 const reviewRoutes = require("./routes/review.routes");
 const messageRoutes = require("./routes/message.routes");
-
-
-console.log("✅ app.js Loaded");
+const notificationRoutes = require("./routes/notification.routes");
+const ApiError = require("./utils/ApiError");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./docs/swagger");
 
 const app = express();
 
-
 // Security
-app.use(helmet())
+app.use(
+    helmet({
+        crossOriginEmbedderPolicy: false,
+        contentSecurityPolicy: false,
+    })
+);
 
-// Compression 
+// Compression
 app.use(compression());
 
-// Cors
+// CORS
 app.use(cookieParser());
-app.use(cors());
 
+const allowedOrigins = [process.env.CLIENT_URL];
+if (process.env.NODE_ENV !== "production") {
+    allowedOrigins.push("http://localhost:5173", "http://localhost:3000");
+}
 
-// Body Parser 
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true,
+}));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(mongoSanitize());
+app.use(hpp());
+app.use(rateLimiter);
+
+// Body Parser
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
 // Logging
 app.use(morgan("dev"));
 
-app.get("/", (req , res) => {
+// Health Check
+app.get("/health", (req, res) => {
     res.status(200).json({
         success: true,
-        message: "SY Digital Backend is running successfully"
+        status: "OK",
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString(),
     });
 });
+
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "SY Digital Backend is running successfully",
+    });
+});
+
+// Swagger Docs
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
@@ -58,9 +96,13 @@ app.use("/api/admin/dashboard", dashboardRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/notifications", notificationRoutes);
 
+// 404 Handler
+app.use((req, res, next) => {
+    next(new ApiError(404, "Route not found"));
+});
 
-
-app.use(errorHandler)
+app.use(errorHandler);
 
 module.exports = app;

@@ -5,7 +5,9 @@ const serviceValidator = [
     body("title")
         .trim()
         .notEmpty()
-        .withMessage("Service title is required"),
+        .withMessage("Service title is required")
+        .isLength({ min: 3, max: 120 })
+        .withMessage("Service title must be between 3 and 120 characters"),
 
     body("shortDescription")
         .trim()
@@ -22,13 +24,15 @@ const serviceValidator = [
     body("category")
         .trim()
         .notEmpty()
-        .withMessage("Category is required"),
+        .withMessage("Category is required")
+        .isLength({ max: 50 })
+        .withMessage("Category cannot exceed 50 characters"),
 
     body("price")
         .notEmpty()
         .withMessage("Price is required")
-        .isNumeric()
-        .withMessage("Price must be a number"),
+        .isFloat({ min: 0 })
+        .withMessage("Price must be a valid number"),
 
 ];
 

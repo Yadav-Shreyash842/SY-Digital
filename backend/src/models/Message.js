@@ -17,15 +17,17 @@ const messageSchema = new mongoose.Schema(
             trim: true,
         },
 
-        phone: {
-            type: String,
-            trim: true,
-        },
+       phone: {
+    type: String,
+    trim: true,
+    default: "",
+},
 
         company: {
-            type: String,
-            trim: true,
-        },
+    type: String,
+    trim: true,
+    default: "",
+},
 
         service: {
             type: mongoose.Schema.Types.ObjectId,
@@ -45,10 +47,11 @@ const messageSchema = new mongoose.Schema(
             trim: true,
         },
 
-        budget: {
-            type: Number,
-            default: 0,
-        },
+       budget: {
+    type: Number,
+    default: 0,
+    min: 0,
+},
 
         status: {
             type: String,
@@ -67,13 +70,11 @@ const messageSchema = new mongoose.Schema(
 
         },
 
-        adminReply: {
-
-            type: String,
-
-            default: null,
-
-        },
+      adminReply: {
+    type: String,
+    trim: true,
+    default: "",
+},
 
         repliedAt: {
 
@@ -102,5 +103,30 @@ const messageSchema = new mongoose.Schema(
     }
 
 );
+
+
+messageSchema.index({ status: 1 });
+messageSchema.index({ service: 1 });
+messageSchema.index({ repliedBy: 1 });
+messageSchema.index({ createdAt: -1 });
+
+messageSchema.index({
+    status: 1,
+    createdAt: -1,
+});
+
+messageSchema.index({
+    name: "text",
+    subject: "text",
+    message: "text",
+    company: "text",
+});
+
+messageSchema.set("toJSON", {
+    transform: function (doc, ret) {
+        delete ret.__v;
+        return ret;
+    },
+});
 
 module.exports = mongoose.model("Message", messageSchema);

@@ -66,10 +66,16 @@ const serviceSchema = new mongoose.Schema(
             },
         ],
 
-        image: {
-            publicId: String,
-            url: String,
-        },
+       image: {
+    publicId: {
+        type: String,
+        default: "",
+    },
+    url: {
+        type: String,
+        default: "",
+    },
+},
 
         isFeatured: {
             type: Boolean,
@@ -92,5 +98,23 @@ const serviceSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
+
+serviceSchema.index({ category: 1 });
+serviceSchema.index({ status: 1 });
+serviceSchema.index({ isFeatured: 1 });
+serviceSchema.index({ createdBy: 1 });
+
+serviceSchema.index({
+    title: "text",
+    shortDescription: "text",
+    description: "text",
+});
+
+serviceSchema.set("toJSON", {
+    transform: function (doc, ret) {
+        delete ret.__v;
+        return ret;
+    },
+});
 
 module.exports = mongoose.model("Service", serviceSchema);

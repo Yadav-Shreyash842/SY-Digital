@@ -1,12 +1,12 @@
-const { uploadImageService } = require("../services/upload.service");
+const {
+    uploadImageService,
+    uploadVideoService,
+} = require("../services/upload.service");
 const ApiResponse = require("../utils/ApiResponse");
 
 const uploadImage = async (req, res, next) => {
 
     try {
-          console.log("========= FILE RECEIVED =========");
-          console.log(req.file);
-          console.log("=================================");
         const result = await uploadImageService(req.file);
 
         return res.status(201).json(

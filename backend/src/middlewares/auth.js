@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const ApiError = require("../utils/ApiError");
+const logger = require("./logger");
 
 const auth = async (req, res, next) => {
     try {
@@ -25,6 +26,13 @@ const auth = async (req, res, next) => {
         // Extract Token
         const token = authHeader.split(" ")[1];
 
+        if (!token) {
+            throw new ApiError(
+                401,
+                "Authorization token is missing"
+            );
+        }
+
         // Verify Token
         const decoded = jwt.verify(
             token,
@@ -32,7 +40,7 @@ const auth = async (req, res, next) => {
         );
 
         // Find User
-        const user = await User.findById(decoded.id);
+        const user = await User.findById(decoded.id).select("-password");
 
         if (!user) {
             throw new ApiError(
@@ -52,6 +60,7 @@ const auth = async (req, res, next) => {
             error.name === "JsonWebTokenError" ||
             error.name === "TokenExpiredError"
         ) {
+            logger.warn(`Authentication failed: ${error.message} — ${req.method} ${req.originalUrl}`);
             return next(
                 new ApiError(
                     401,

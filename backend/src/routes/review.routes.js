@@ -12,8 +12,7 @@ const ROLES = require("../constants/roles");
 
 const {
 
-   
-      create,
+    create,
 
     getAll,
 
@@ -32,6 +31,39 @@ const {
 } = require("../controllers/review.controller");
 
 const { createReviewValidator, } = require("../validators/review.validator");
+
+// Static routes first — must come before /:id
+router.get(
+
+    "/featured",
+
+    featured
+
+);
+
+router.get(
+
+    "/dashboard/stats",
+
+    auth,
+
+    authorize(ROLES.ADMIN),
+
+    stats
+
+);
+
+router.get(
+
+    "/dashboard/rating-analytics",
+
+    auth,
+
+    authorize(ROLES.ADMIN),
+
+    ratingAnalytics
+
+);
 
 router.post(
 
@@ -61,6 +93,7 @@ router.get(
 
 );
 
+// Dynamic routes last
 router.get(
 
     "/:id",
@@ -94,38 +127,6 @@ router.delete(
     authorize(ROLES.ADMIN),
 
     remove
-
-);
-
-router.get(
-
-    "/featured",
-
-    featured
-
-);
-
-router.get(
-
-    "/dashboard/stats",
-
-    auth,
-
-    authorize(ROLES.ADMIN),
-
-    stats
-
-);
-
-router.get(
-
-    "/dashboard/rating-analytics",
-
-    auth,
-
-    authorize(ROLES.ADMIN),
-
-    ratingAnalytics
 
 );
 

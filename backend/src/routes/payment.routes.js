@@ -26,63 +26,11 @@ const {
 
     statusAnalytics,
 
-
 } = require("../controllers/payment.controller");
 
-const { createPaymentValidator,} = require("../validators/payment.validator");
+const { createPaymentValidator, } = require("../validators/payment.validator");
 
-router.post(
-
-    "/",
-
-    auth,
-
-    authorize(ROLES.ADMIN),
-
-    createPaymentValidator,
-
-    validate,
-
-    create
-
-);
-
-router.get(
-
-    "/",
-
-    auth,
-
-    authorize(ROLES.ADMIN),
-
-    getAll
-
-);
-
-router.get(
-
-    "/:id",
-
-    auth,
-
-    authorize(ROLES.ADMIN),
-
-    getById
-
-);
-
-router.patch(
-
-    "/:id/status",
-
-    auth,
-
-    authorize(ROLES.ADMIN),
-
-    updateStatus
-
-);
-
+// Static routes first — must come before /:id
 router.get(
 
     "/dashboard/stats",
@@ -116,6 +64,59 @@ router.get(
     authorize(ROLES.ADMIN),
 
     statusAnalytics
+
+);
+
+router.post(
+
+    "/",
+
+    auth,
+
+    authorize(ROLES.ADMIN),
+
+    createPaymentValidator,
+
+    validate,
+
+    create
+
+);
+
+router.get(
+
+    "/",
+
+    auth,
+
+    authorize(ROLES.ADMIN),
+
+    getAll
+
+);
+
+// Dynamic routes last
+router.get(
+
+    "/:id",
+
+    auth,
+
+    authorize(ROLES.ADMIN),
+
+    getById
+
+);
+
+router.patch(
+
+    "/:id/status",
+
+    auth,
+
+    authorize(ROLES.ADMIN),
+
+    updateStatus
 
 );
 

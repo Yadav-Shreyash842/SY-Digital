@@ -16,9 +16,12 @@ const reviewSchema = new mongoose.Schema(
         },
 
         company: {
-            type: String,
-            trim: true,
-        },
+    type: String,
+    trim: true,
+    default: "",
+},
+
+        
 
         service: {
             type: mongoose.Schema.Types.ObjectId,
@@ -39,10 +42,16 @@ const reviewSchema = new mongoose.Schema(
             trim: true,
         },
 
-        profileImage: {
-            type: String,
-            default: null,
-        },
+     profileImage: {
+    publicId: {
+        type: String,
+        default: "",
+    },
+    url: {
+        type: String,
+        default: "",
+    },
+},
 
         featured: {
             type: Boolean,
@@ -70,5 +79,24 @@ const reviewSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
+
+reviewSchema.index({ status: 1 });
+reviewSchema.index({ featured: 1 });
+reviewSchema.index({ service: 1 });
+reviewSchema.index({ createdBy: 1 });
+reviewSchema.index({ createdAt: -1 }); 
+
+reviewSchema.index({
+    status: 1,
+    featured: 1,
+}); 
+
+reviewSchema.set("toJSON", {
+    transform: function (doc, ret) {
+        delete ret.__v;
+        return ret;
+    },
+});
+
 
 module.exports = mongoose.model("Review", reviewSchema);

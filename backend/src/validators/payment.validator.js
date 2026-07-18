@@ -11,7 +11,9 @@ const createPaymentValidator = [
     body("clientName")
         .trim()
         .notEmpty()
-        .withMessage("Client name is required"),
+        .withMessage("Client name is required")
+        .isLength({ max: 100 })
+        .withMessage("Client name cannot exceed 100 characters"),
 
     body("clientEmail")
         .trim()
@@ -20,7 +22,8 @@ const createPaymentValidator = [
 
     body("amount")
         .isFloat({ min: 1 })
-        .withMessage("Amount must be greater than 0"),
+        .withMessage("Amount must be greater than 0")
+        .toFloat(),
 
 ];
 

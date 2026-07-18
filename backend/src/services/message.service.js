@@ -1,6 +1,13 @@
+const { emitToAdmins } = require("../socket/socketEmitter");
 const Message = require("../models/Message");
 const Service = require("../models/Service");
-const ApiError = require("../utils/ApiError"); 
+const ApiError = require("../utils/ApiError");
+const logger = require("../middlewares/logger");
+
+const { createNotification } = require("./notification.service");
+const { sendEmail } = require("./email.service");
+const contactReply = require("../emails/contactReply");
+
 
 const createMessage = async (messageData) => {
 
@@ -19,9 +26,46 @@ const createMessage = async (messageData) => {
 
     }
 
-    const message = await Message.create(messageData);
+   const message = await Message.create(messageData);
+   
 
-    return message;
+await message.populate("service", "title");
+
+try {
+
+    await createNotification({
+
+        title: "New Contact Message",
+
+        message: `${message.name} sent a new contact message.`,
+
+        type: "message",
+
+        referenceId: message._id,
+
+        referenceModel: "Message",
+
+    });
+
+} catch (error) {
+
+    logger.warn(`[Notification Service] ${error.message}`);
+
+}
+
+try {
+
+    emitToAdmins("newMessage", {
+        message,
+    });
+
+} catch (error) {
+
+    logger.warn(`[Socket.IO] ${error.message}`);
+
+}
+
+return message;
 
 };
 
@@ -116,6 +160,49 @@ const updateMessageStatus = async (id, status) => {
     message.status = status;
 
     await message.save();
+    await message.populate("service", "title");
+
+    try {
+
+    await createNotification({
+
+        title: "Message Status Updated",
+
+        message: `${message.name}'s message marked as ${status}.`,
+
+        type: "message",
+
+        referenceId: message._id,
+
+        referenceModel: "Message",
+
+    });
+
+} catch (error) {
+
+    logger.warn(`[Notification Service] ${error.message}`);
+
+}
+
+try {
+
+    emitToAdmins("messageStatusUpdated", {
+
+        messageId: message._id,
+
+        status,
+
+        message,
+
+    });
+
+} catch (error) {
+
+    logger.warn(`[Socket.IO] ${error.message}`);
+
+}
+
+
 
     return message;
 
@@ -126,18 +213,24 @@ const deleteMessage = async (id) => {
     const message = await Message.findById(id);
 
     if (!message) {
-
-        throw new ApiError(
-
-            404,
-
-            "Message not found"
-
-        );
-
+        throw new ApiError(404, "Message not found");
     }
 
     await message.deleteOne();
+
+    try {
+
+        emitToAdmins("messageDeleted", {
+            messageId: message._id,
+        });
+
+    } catch (error) {
+
+        logger.warn(`[Socket.IO] ${error.message}`);
+
+    }
+
+    return message;
 
 };
 
@@ -163,8 +256,69 @@ const replyToMessage = async (messageId, reply, adminId) => {
     message.repliedBy = adminId;
 
     await message.save();
+    await message.populate("service", "title");
 
-    return message;
+try {
+
+    await createNotification({
+
+        title: "Message Replied",
+
+        message: `Reply sent to ${message.name}.`,
+
+        type: "message",
+
+        referenceId: message._id,
+
+        referenceModel: "Message",
+
+    });
+
+} catch (error) {
+
+    logger.warn(`[Notification Service] ${error.message}`);
+
+}
+
+try {
+
+    await sendEmail({
+
+        to: message.email,
+
+        subject: "Reply from SY Digital",
+
+        html: contactReply({
+
+            name: message.name,
+
+            reply: message.adminReply,
+
+        }),
+
+    });
+
+} catch (error) {
+
+    logger.warn(`[Email Service] ${error.message}`);
+
+}
+
+try {
+
+    emitToAdmins("messageReplied", {
+
+        message,
+
+    });
+
+} catch (error) {
+
+    logger.warn(`[Socket.IO] ${error.message}`);
+
+}
+
+return message;
 
 };
 

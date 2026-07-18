@@ -29,31 +29,41 @@ const paymentSchema = new mongoose.Schema(
             min: 0,
         },
 
-        currency: {
-            type: String,
-            default: "INR",
-        },
+      currency: {
+    type: String,
+    uppercase: true,
+    trim: true,
+    enum: ["INR", "USD", "EUR"],
+    default: "INR",
+},
 
-        paymentMethod: {
-            type: String,
-            enum: [
-                "razorpay",
-                "stripe",
-                "cash",
-                "bank-transfer",
-            ],
-            default: "razorpay",
-        },
+      paymentMethod: {
+    type: String,
+    trim: true,
+    enum: [
+        "razorpay",
+        "stripe",
+        "cash",
+        "bank-transfer",
+    ],
+    default: "razorpay",
+},
 
         transactionId: {
-            type: String,
-            default: null,
-        },
+    type: String,
+    trim: true,
+    unique: true,
+    sparse: true,
+    default: null,
+},
 
-        orderId: {
-            type: String,
-            default: null,
-        },
+       orderId: {
+    type: String,
+    trim: true,
+    unique: true,
+    sparse: true,
+    default: null,
+},
 
         paymentStatus: {
             type: String,
@@ -66,14 +76,16 @@ const paymentSchema = new mongoose.Schema(
             default: "pending",
         },
 
-        notes: {
-            type: String,
-            trim: true,
-        },
+       notes: {
+    type: String,
+    trim: true,
+    default: "",
+},
 
-        paidAt: {
-            type: Date,
-        },
+       paidAt: {
+    type: Date,
+    default: null,
+},
 
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
@@ -88,5 +100,22 @@ const paymentSchema = new mongoose.Schema(
     }
 
 );
+
+paymentSchema.index({ meeting: 1 });
+paymentSchema.index({ paymentStatus: 1 });
+paymentSchema.index({ createdBy: 1 });
+paymentSchema.index({ paidAt: 1 });
+
+paymentSchema.index({
+    paymentStatus: 1,
+    paidAt: -1,
+});
+
+paymentSchema.set("toJSON", {
+    transform: function (doc, ret) {
+        delete ret.__v;
+        return ret;
+    },
+});
 
 module.exports = mongoose.model("Payment", paymentSchema);

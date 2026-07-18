@@ -33,6 +33,43 @@ const {
     replyMessageValidator,
 } = require("../validators/message.validator");
 
+// Static routes first — must come before /:id
+router.get(
+
+    "/dashboard/stats",
+
+    auth,
+
+    authorize(ROLES.ADMIN),
+
+    stats
+
+);
+
+router.get(
+
+    "/dashboard/monthly-analytics",
+
+    auth,
+
+    authorize(ROLES.ADMIN),
+
+    monthlyAnalytics
+
+);
+
+router.get(
+
+    "/dashboard/recent",
+
+    auth,
+
+    authorize(ROLES.ADMIN),
+
+    recentMessages
+
+);
+
 router.post(
 
     "/",
@@ -57,6 +94,7 @@ router.get(
 
 );
 
+// Dynamic routes last
 router.get(
 
     "/:id",
@@ -106,42 +144,6 @@ router.patch(
     validate,
 
     reply
-
-);
-
-router.get(
-
-    "/dashboard/stats",
-
-    auth,
-
-    authorize(ROLES.ADMIN),
-
-    stats
-
-);
-
-router.get(
-
-    "/dashboard/monthly-analytics",
-
-    auth,
-
-    authorize(ROLES.ADMIN),
-
-    monthlyAnalytics
-
-);
-
-router.get(
-
-    "/dashboard/recent",
-
-    auth,
-
-    authorize(ROLES.ADMIN),
-
-    recentMessages
 
 );
 

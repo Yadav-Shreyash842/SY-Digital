@@ -15,11 +15,15 @@ const meetingValidator = [
     body("phone")
         .trim()
         .notEmpty()
-        .withMessage("Phone number is required"),
+        .withMessage("Phone number is required")
+        .isMobilePhone("any")
+        .withMessage("Please provide a valid phone number"),
 
     body("service")
         .notEmpty()
-        .withMessage("Service is required"),
+        .withMessage("Service is required")
+        .isMongoId()
+        .withMessage("Invalid service ID"),
 
     body("meetingDate")
         .notEmpty()
@@ -35,7 +39,9 @@ const meetingValidator = [
     body("projectRequirements")
         .trim()
         .notEmpty()
-        .withMessage("Project requirements are required"),
+        .withMessage("Project requirements are required")
+        .isLength({ max: 5000 })
+        .withMessage("Project requirements cannot exceed 5000 characters"),
 
 ];
 

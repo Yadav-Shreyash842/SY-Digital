@@ -23,10 +23,11 @@ const blogSchema = new mongoose.Schema(
             maxlength: 250,
         },
 
-        content: {
-            type: String,
-            required: true,
-        },
+      content: {
+    type: String,
+    required: true,
+    trim: true,
+},
 
         featuredImage: {
             publicId: {
@@ -59,14 +60,17 @@ const blogSchema = new mongoose.Schema(
         },
 
         readTime: {
-            type: Number,
-            default: 5,
-        },
+    type: Number,
+    default: 5,
+    min: 1,
+},
 
-        views: {
-            type: Number,
-            default: 0,
-        },
+
+views: {
+    type: Number,
+    default: 0,
+    min: 0,
+},
 
         seoTitle: {
             type: String,
@@ -111,7 +115,31 @@ const blogSchema = new mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model(
-    "Blog",
-    blogSchema
-);
+blogSchema.index({ category: 1 });
+blogSchema.index({ status: 1 });
+blogSchema.index({ isFeatured: 1 });
+blogSchema.index({ createdBy: 1 });
+blogSchema.index({ publishedAt: -1 });
+
+blogSchema.index({
+    title: "text",
+    shortDescription: "text",
+    content: "text",
+    seoTitle: "text",
+    seoDescription: "text",
+});
+
+blogSchema.index({
+    status: 1,
+    isFeatured: 1,
+});
+
+blogSchema.set("toJSON", {
+    transform: function (doc, ret) {
+        delete ret.__v;
+        return ret;
+    },
+});
+
+module.exports = mongoose.model("Blog", blogSchema);
+

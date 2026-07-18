@@ -1,12 +1,171 @@
+const mongoose = require("mongoose");
 const Project = require("../models/Project");
 const slugify = require("../helpers/slugify");
 const ApiError = require("../utils/ApiError");
+
+const assertValidProjectId = (projectId) => {
+    if (!mongoose.isValidObjectId(projectId)) {
+        throw new ApiError(400, "Invalid project ID");
+    }
+};
+const PROJECT_SELECT = [
+    "title",
+    "slug",
+    "shortDescription",
+    "description",
+    "category",
+    "clientName",
+    "technologies",
+    "images",
+    "video",
+    "githubUrl",
+    "liveUrl",
+    "completionDate",
+    "isFeatured",
+    "status",
+    "createdBy",
+    "createdAt",
+    "updatedAt",
+].join(" ");
+
+const MAX_LIMIT = 100;
+
+const escapeRegex = (value = "") => {
+    return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
+const parsePage = (value) => {
+    const parsed = Number.parseInt(value, 10);
+
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+};
+
+const parseLimit = (value) => {
+    const parsed = Number.parseInt(value, 10);
+
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+        return 10;
+    }
+
+    return Math.min(parsed, MAX_LIMIT);
+};
+
+const parseBoolean = (value) => {
+    if (value === true || value === "true") {
+        return true;
+    }
+
+    if (value === false || value === "false") {
+        return false;
+    }
+
+    return null;
+};
+
+const buildProjectFilter = (query = {}) => {
+    const filter = {};
+
+    if (query.search) {
+        const search = escapeRegex(query.search.trim());
+
+        if (search) {
+            filter.$or = [
+                {
+                    title: {
+                        $regex: search,
+                        $options: "i",
+                    },
+                },
+                {
+                    clientName: {
+                        $regex: search,
+                        $options: "i",
+                    },
+                },
+                {
+                    shortDescription: {
+                        $regex: search,
+                        $options: "i",
+                    },
+                },
+                {
+                    description: {
+                        $regex: search,
+                        $options: "i",
+                    },
+                },
+            ];
+        }
+    }
+
+    if (query.category) {
+        filter.category = query.category;
+    }
+
+    if (query.status) {
+        filter.status = query.status;
+    }
+
+    const featured = parseBoolean(query.featured);
+
+    if (featured !== null) {
+        filter.isFeatured = featured;
+    }
+
+    if (query.startDate || query.endDate) {
+        filter.createdAt = {};
+
+        if (query.startDate) {
+            const startDate = new Date(query.startDate);
+
+            if (!Number.isNaN(startDate.getTime())) {
+                filter.createdAt.$gte = startDate;
+            }
+        }
+
+        if (query.endDate) {
+            const endDate = new Date(query.endDate);
+
+            if (!Number.isNaN(endDate.getTime())) {
+                filter.createdAt.$lte = endDate;
+            }
+        }
+
+        if (Object.keys(filter.createdAt).length === 0) {
+            delete filter.createdAt;
+        }
+    }
+
+    return filter;
+};
+
+const buildProjectSort = (sortKey) => {
+    switch (sortKey) {
+        case "title":
+            return { title: 1 };
+
+        case "oldest":
+            return { createdAt: 1 };
+
+        case "updated":
+            return { updatedAt: -1 };
+
+        case "completed":
+            return { completionDate: -1 };
+
+        case "newest":
+        default:
+            return { createdAt: -1 };
+    }
+};
 
 const createProject = async (projectData, userId) => {
 
     const slug = slugify(projectData.title);
 
-    const existingProject = await Project.findOne({ slug });
+    const existingProject = await Project.findOne({ slug })
+        .select("_id")
+        .lean();
 
     if (existingProject) {
         throw new ApiError(
@@ -32,64 +191,21 @@ const createProject = async (projectData, userId) => {
 
 const getAllProjects = async (query) => {
 
-    const page = Number(query.page) || 1;
-    const limit = Number(query.limit) || 10;
+    const page = parsePage(query.page);
+    const limit = parseLimit(query.limit);
     const skip = (page - 1) * limit;
+    const filter = buildProjectFilter(query);
+    const sort = buildProjectSort(query.sort);
 
-    const filter = {};
-
-    // Search
-    if (query.search) {
-        filter.title = {
-            $regex: query.search,
-            $options: "i",
-        };
-    }
-
-    // Category
-    if (query.category) {
-        filter.category = query.category;
-    }
-
-    // Status
-    if (query.status) {
-        filter.status = query.status;
-    }
-
-    // Featured
-    if (query.featured !== undefined) {
-        filter.isFeatured = query.featured === "true";
-    }
-
-    // Sorting
-    let sort = { createdAt: -1 };
-
-    switch (query.sort) {
-
-        case "title":
-            sort = { title: 1 };
-            break;
-
-        case "oldest":
-            sort = { createdAt: 1 };
-            break;
-
-        case "newest":
-            sort = { createdAt: -1 };
-            break;
-
-        case "completed":
-            sort = { completionDate: -1 };
-            break;
-
-    }
-
-    const totalItems = await Project.countDocuments(filter);
-
-    const projects = await Project.find(filter)
-        .sort(sort)
-        .skip(skip)
-        .limit(limit);
+    const [totalItems, projects] = await Promise.all([
+        Project.countDocuments(filter),
+        Project.find(filter)
+            .select(PROJECT_SELECT)
+            .sort(sort)
+            .skip(skip)
+            .limit(limit)
+            .lean(),
+    ]);
 
     return {
 
@@ -103,7 +219,7 @@ const getAllProjects = async (query) => {
 
             totalItems,
 
-            totalPages: Math.ceil(totalItems / limit),
+            totalPages: Math.max(1, Math.ceil(totalItems / limit)),
 
         },
 
@@ -116,7 +232,9 @@ const getProjectBySlug = async (slug) => {
 
     const project = await Project.findOne({
         slug,
-    });
+    })
+        .select(PROJECT_SELECT)
+        .lean();
 
     if (!project) {
         throw new ApiError(
@@ -130,6 +248,8 @@ const getProjectBySlug = async (slug) => {
 };
 
 const updateProject = async (projectId, updateData) => {
+
+    assertValidProjectId(projectId);
 
     const project = await Project.findById(projectId);
 
@@ -151,7 +271,9 @@ const updateProject = async (projectId, updateData) => {
         const existingProject = await Project.findOne({
             slug,
             _id: { $ne: projectId },
-        });
+        })
+            .select("_id")
+            .lean();
 
         if (existingProject) {
             throw new ApiError(
@@ -163,7 +285,28 @@ const updateProject = async (projectId, updateData) => {
         updateData.slug = slug;
     }
 
-    Object.assign(project, updateData);
+    const allowedFields = [
+        "title",
+        "shortDescription",
+        "description",
+        "category",
+        "clientName",
+        "technologies",
+        "images",
+        "video",
+        "githubUrl",
+        "liveUrl",
+        "completionDate",
+        "isFeatured",
+        "status",
+        "slug",
+    ];
+
+    allowedFields.forEach((field) => {
+        if (updateData[field] !== undefined) {
+            project[field] = updateData[field];
+        }
+    });
 
     await project.save();
 
@@ -172,7 +315,9 @@ const updateProject = async (projectId, updateData) => {
 
 const deleteProject = async (projectId) => {
 
-    const project = await Project.findById(projectId);
+    assertValidProjectId(projectId);
+
+    const project = await Project.findByIdAndDelete(projectId);
 
     if (!project) {
         throw new ApiError(
@@ -180,8 +325,6 @@ const deleteProject = async (projectId) => {
             "Project not found"
         );
     }
-
-    await Project.findByIdAndDelete(projectId);
 
     return project;
 
@@ -195,11 +338,14 @@ const getFeaturedProjects = async () => {
 
         status: "published",
 
-    }).sort({
+    })
+        .select(PROJECT_SELECT)
+        .sort({
 
-        createdAt: -1,
+            createdAt: -1,
 
-    });
+        })
+        .lean();
 
     return projects;
 
@@ -214,4 +360,3 @@ module.exports = {
     updateProject,
     deleteProject,
 };
-    

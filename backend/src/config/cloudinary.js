@@ -7,7 +7,4 @@ cloudinary.config({
     secure: true,
 });
 
-console.log("Cloudinary Loaded:", !!cloudinary);
-console.log("Uploader Exists:", !!cloudinary.uploader);
-
 module.exports = cloudinary;

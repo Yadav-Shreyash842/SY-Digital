@@ -17,6 +17,7 @@ const {
     updateStatus,
     reschedule,
     cancel,
+    history,
 } = require("../controllers/meeting.controller");
 
 const { meetingValidator } = require("../validators/meeting.validator");
@@ -57,6 +58,13 @@ router.delete(
     auth,
     authorize(ROLES.ADMIN),
     remove
+);
+
+router.get(
+    "/:id/history",
+    auth,
+    authorize(ROLES.ADMIN),
+    history
 );
 
 router.patch(
