@@ -3,7 +3,6 @@ const cors = require("cors");
 const helmet = require("helmet");
 const compression = require("compression");
 const morgan = require("morgan");
-const mongoSanitize = require("express-mongo-sanitize");
 const rateLimiter = require("./middlewares/rateLimiter");
 const hpp = require("hpp");
 const cookieParser = require("cookie-parser");
@@ -55,7 +54,7 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use(mongoSanitize());
+
 app.use(hpp());
 app.use(rateLimiter);
 

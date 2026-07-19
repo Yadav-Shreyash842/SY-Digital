@@ -161,31 +161,23 @@ const buildProjectSort = (sortKey) => {
 
 const createProject = async (projectData, userId) => {
 
-    const slug = slugify(projectData.title);
+    const baseSlug = slugify(projectData.title);
 
-    const existingProject = await Project.findOne({ slug })
-        .select("_id")
-        .lean();
+    let slug = baseSlug;
+    let counter = 1;
 
-    if (existingProject) {
-        throw new ApiError(
-            409,
-            "Project already exists"
-        );
+    while (await Project.findOne({ slug }).select("_id").lean()) {
+        slug = `${baseSlug}-${counter}`;
+        counter++;
     }
 
     const project = await Project.create({
-
         ...projectData,
-
         slug,
-
         createdBy: userId,
-
     });
 
     return project;
-
 };
 
 
