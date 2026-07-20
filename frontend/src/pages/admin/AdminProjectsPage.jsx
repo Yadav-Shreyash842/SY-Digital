@@ -811,7 +811,7 @@ export default function AdminProjectsPage() {
       isOpen={isEdit ? isEditModalOpen : isCreateModalOpen}
       onClose={isEdit ? closeEditModal : closeCreateModal}
       title={isEdit ? "Edit Project" : "Create New Project"}
-      size="lg"
+      size="xl"
     >
       <div className="space-y-5">
         <Input
@@ -850,7 +850,7 @@ export default function AdminProjectsPage() {
           error={formErrors.description}
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid gap-5 md:grid-cols-2">
           <Input
             label="Client Name"
             name="clientName"
@@ -878,7 +878,7 @@ export default function AdminProjectsPage() {
           theme="light"
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid gap-5 md:grid-cols-2">
           <Input
             label="GitHub URL"
             name="githubUrl"
@@ -899,7 +899,7 @@ export default function AdminProjectsPage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid gap-5 md:grid-cols-2">
           <Input
             type="date"
             label="Completion Date"
@@ -924,7 +924,7 @@ export default function AdminProjectsPage() {
           onChange={handleSwitch}
         />
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
           <FileDropZone
             accept="image/*"
             label="Project Image"
