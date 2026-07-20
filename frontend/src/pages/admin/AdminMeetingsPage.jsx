@@ -306,7 +306,7 @@ export default function AdminMeetingsPage() {
       <Modal isOpen={showView} onClose={() => setShowView(false)} title="Meeting Details" size="lg">
         {selected && (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div><span className="text-text-secondary">Client:</span> <span className="font-medium">{selected.name}</span></div>
               <div><span className="text-text-secondary">Email:</span> {selected.email}</div>
               <div><span className="text-text-secondary">Phone:</span> {selected.phone}</div>

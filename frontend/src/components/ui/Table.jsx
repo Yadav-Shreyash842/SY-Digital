@@ -54,6 +54,7 @@ export default function Table({
                       className={cn(
                         'px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider',
                         theme === 'dark' ? 'text-text-muted' : 'text-gray-500',
+                        col.hideOnMobile && 'hidden sm:table-cell',
                       )}
                       style={{ width: col.width }}
                     >
@@ -73,7 +74,7 @@ export default function Table({
                     style={{ height: '60px' }}
                   >
                     {columns.map((col) => (
-                      <td key={col.key} className={cn('px-6 py-4 text-sm', theme === 'dark' ? 'text-text-secondary' : 'text-gray-600')}>
+                      <td key={col.key} className={cn('px-6 py-4 text-sm', theme === 'dark' ? 'text-text-secondary' : 'text-gray-600', col.hideOnMobile && 'hidden sm:table-cell')}>
                         {col.render ? col.render(row) : row[col.key]}
                       </td>
                     ))}

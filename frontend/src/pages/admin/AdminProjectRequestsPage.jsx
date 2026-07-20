@@ -319,7 +319,7 @@ export default function AdminProjectRequestsPage() {
               <p className="text-sm leading-7 whitespace-pre-wrap text-text-secondary">{selected.description}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {selected.budget > 0 && (
                 <div>
                   <p className="text-sm text-text-muted">Budget</p>

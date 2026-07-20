@@ -540,6 +540,7 @@ export default function AdminProjectsPage() {
         />
       ),
       width: "50px",
+      hideOnMobile: true,
       render: (row) => (
         <Checkbox
           checked={selectedIds.has(row._id)}
@@ -590,11 +591,13 @@ export default function AdminProjectsPage() {
     {
       key: "clientName",
       label: "Client",
+      hideOnMobile: true,
       render: (row) => row.clientName || "-",
     },
     {
       key: "category",
       label: "Category",
+      hideOnMobile: true,
       render: (row) => (
         <Badge variant="purple">{formatCategory(row.category)}</Badge>
       ),
@@ -610,6 +613,7 @@ export default function AdminProjectsPage() {
       key: "isFeatured",
       label: "Featured",
       width: "80px",
+      hideOnMobile: true,
       render: (row) =>
         row.isFeatured ? (
           <Star
@@ -623,6 +627,7 @@ export default function AdminProjectsPage() {
     {
       key: "completionDate",
       label: "Completed",
+      hideOnMobile: true,
       render: (row) => (
         <span className="text-xs text-gray-500">
           {formatProjectDate(row.completionDate)}
@@ -668,14 +673,14 @@ export default function AdminProjectsPage() {
   };
 
   const filtersUI = (
-    <div className="flex flex-wrap items-end gap-3">
+    <div className="grid grid-cols-1 sm:flex sm:flex-wrap sm:items-end gap-3">
       <Select
         label="Status"
         value={statusFilter}
         onChange={handleFilterChange(setStatusFilter)}
         options={STATUS_FILTER_OPTIONS}
         theme="light"
-        className="w-40"
+        className="w-full sm:w-40"
       />
       <Select
         label="Category"
@@ -683,7 +688,7 @@ export default function AdminProjectsPage() {
         onChange={handleFilterChange(setCategoryFilter)}
         options={CATEGORY_FILTER_OPTIONS}
         theme="light"
-        className="w-44"
+        className="w-full sm:w-44"
       />
       <Select
         label="Featured"
@@ -691,7 +696,7 @@ export default function AdminProjectsPage() {
         onChange={handleFilterChange(setFeaturedFilter)}
         options={FEATURED_FILTER_OPTIONS}
         theme="light"
-        className="w-36"
+        className="w-full sm:w-36"
       />
       <Select
         label="Sort"
@@ -699,7 +704,7 @@ export default function AdminProjectsPage() {
         onChange={handleFilterChange(setSortFilter)}
         options={SORT_OPTIONS}
         theme="light"
-        className="w-44"
+        className="w-full sm:w-44"
       />
       <Input
         label="From"
@@ -707,7 +712,7 @@ export default function AdminProjectsPage() {
         value={startDate}
         onChange={handleFilterChange(setStartDate)}
         theme="light"
-        className="w-40"
+        className="w-full sm:w-40"
       />
       <Input
         label="To"
@@ -715,7 +720,7 @@ export default function AdminProjectsPage() {
         value={endDate}
         onChange={handleFilterChange(setEndDate)}
         theme="light"
-        className="w-40"
+        className="w-full sm:w-40"
       />
       {hasActiveFilters && (
         <Button
@@ -732,7 +737,7 @@ export default function AdminProjectsPage() {
 
   const toolbarUI =
     selectedIds.size > 0 ? (
-      <div className="flex flex-wrap items-center gap-3 rounded-btn border border-primary/20 bg-primary/5 px-5 py-3">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 rounded-btn border border-primary/20 bg-primary/5 px-3 sm:px-5 py-3">
         <span className="text-sm font-medium text-primary">
           {selectedIds.size} project{selectedIds.size > 1 ? "s" : ""} selected
         </span>
@@ -845,7 +850,7 @@ export default function AdminProjectsPage() {
           error={formErrors.description}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
             label="Client Name"
             name="clientName"
@@ -873,7 +878,7 @@ export default function AdminProjectsPage() {
           theme="light"
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
             label="GitHub URL"
             name="githubUrl"
@@ -894,7 +899,7 @@ export default function AdminProjectsPage() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
             type="date"
             label="Completion Date"

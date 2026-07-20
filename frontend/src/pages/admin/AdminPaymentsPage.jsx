@@ -314,7 +314,7 @@ export default function AdminPaymentsPage() {
       {/* Create Payment Modal */}
       <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Create Payment" size="md">
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Client Name"
               value={formData.clientName}
@@ -329,7 +329,7 @@ export default function AdminPaymentsPage() {
               error={errors.clientEmail}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Amount"
               type="number"
@@ -344,7 +344,7 @@ export default function AdminPaymentsPage() {
               onChange={(v) => setFormData({ ...formData, currency: v })}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
               label="Payment Method"
               options={paymentMethodOptions}
@@ -385,7 +385,7 @@ export default function AdminPaymentsPage() {
                 {selected.paymentStatus?.charAt(0).toUpperCase() + selected.paymentStatus?.slice(1)}
               </Badge>
             </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-text-secondary">Amount:</span>{' '}
                 <span className="font-semibold">{formatCurrency(selected.amount, selected.currency)}</span>

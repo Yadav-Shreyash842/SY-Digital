@@ -228,7 +228,7 @@ export default function AdminUsersPage() {
       {/* Create Modal */}
       <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Add User" size="md">
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input label="First Name" value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} error={errors.firstName} />
             <Input label="Last Name" value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} error={errors.lastName} />
           </div>
@@ -245,7 +245,7 @@ export default function AdminUsersPage() {
       {/* Edit Modal */}
       <Modal isOpen={showEdit} onClose={() => setShowEdit(false)} title="Edit User" size="md">
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input label="First Name" value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} error={errors.firstName} />
             <Input label="Last Name" value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} error={errors.lastName} />
           </div>
@@ -269,7 +269,7 @@ export default function AdminUsersPage() {
                 <p className="text-sm text-text-secondary">{selected.email}</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div><span className="text-text-secondary">Role:</span> <Badge variant={selected.role === 'admin' ? 'primary' : 'blue'}>{selected.role}</Badge></div>
               <div><span className="text-text-secondary">Status:</span> <Badge variant={selected.isVerified ? 'success' : 'warning'}>{selected.isVerified ? 'Verified' : 'Unverified'}</Badge></div>
               <div><span className="text-text-secondary">Phone:</span> {selected.phone || 'N/A'}</div>
