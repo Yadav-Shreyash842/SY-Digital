@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
   Users,
@@ -48,7 +48,8 @@ const sidebarLinks = [
 export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
 
   const userInitials = user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'AD'
   const userFullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Admin'
@@ -140,7 +141,7 @@ export default function AdminLayout() {
         </div>
       </nav>
 
-      <div className="border-t border-border px-4 py-4">
+      <div className="border-t border-border px-4 py-4 space-y-2">
         <Link
           to="/"
           className="flex items-center gap-3 rounded-btn bg-white/5 px-4 py-3 text-sm font-medium text-text-secondary transition hover:bg-white/10 hover:text-white"
@@ -148,6 +149,14 @@ export default function AdminLayout() {
           <LogOut strokeWidth={1.75} className="h-5 w-5" />
           {(!collapsed || mobile) && <span>Back to Site</span>}
         </Link>
+        <button
+          type="button"
+          onClick={() => { logout(); navigate('/login') }}
+          className="flex w-full items-center gap-3 rounded-btn bg-danger/10 px-4 py-3 text-sm font-medium text-danger transition hover:bg-danger/20"
+        >
+          <LogOut strokeWidth={1.75} className="h-5 w-5" />
+          {(!collapsed || mobile) && <span>Logout</span>}
+        </button>
       </div>
     </div>
   )
