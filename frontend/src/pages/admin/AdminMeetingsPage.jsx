@@ -1,31 +1,20 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Eye, CheckCircle, XCircle, Clock, CalendarClock, Ban } from 'lucide-react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
-import AdminListPage from '../../components/dashboard/AdminListPage'
-import Badge from '../../components/ui/Badge'
-import Modal from '../../components/ui/Modal'
+import Breadcrumb from '../../components/ui/Breadcrumb'
 import Button from '../../components/ui/Button'
+import Modal from '../../components/ui/Modal'
+import Badge from '../../components/ui/Badge'
 import Input from '../../components/ui/Input'
 import Textarea from '../../components/ui/Textarea'
-import Select from '../../components/ui/Select'
 import Timeline from '../../components/ui/Timeline'
 import useSocket from '../../hooks/useSocket'
 import meetingService from '../../services/meeting.service'
-
-const statusOptions = [
-  { value: '', label: 'All Statuses' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'approved', label: 'Approved' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'cancelled', label: 'Cancelled' },
-  { value: 'rejected', label: 'Rejected' },
-]
-
-const meetingTypeOptions = [
-  { value: '', label: 'All Types' },
-  { value: 'online', label: 'Online' },
-  { value: 'offline', label: 'Offline' },
-]
+import MeetingStatsCards from '../../components/admin/meetings/MeetingStatsCards'
+import MeetingFilterBar from '../../components/admin/meetings/MeetingFilterBar'
+import MeetingDataTable from '../../components/admin/meetings/MeetingDataTable'
+import MeetingRightPanel from '../../components/admin/meetings/MeetingRightPanel'
+import { Clock, CheckCircle, XCircle, Ban, CalendarClock } from 'lucide-react'
 
 const statusVariant = {
   pending: 'warning',
@@ -49,64 +38,20 @@ const historyIcon = {
   updated: CalendarClock,
 }
 
-const columns = [
-  {
-    key: 'name',
-    label: 'Client',
-    render: (row) => (
-      <div>
-        <p className="font-medium text-white">{row.name}</p>
-        <p className="text-xs text-text-secondary">{row.email}</p>
-      </div>
-    ),
-  },
-  {
-    key: 'service',
-    label: 'Service',
-    render: (row) => <Badge variant="primary">{row.service?.title || '—'}</Badge>,
-  },
-  {
-    key: 'meetingType',
-    label: 'Type',
-    render: (row) => (
-      <Badge variant={row.meetingType === 'online' ? 'blue' : 'primary'}>
-        {row.meetingType === 'online' ? 'Online' : 'Offline'}
-      </Badge>
-    ),
-  },
-  {
-    key: 'meetingDate',
-    label: 'Date',
-    render: (row) => <span className="text-sm text-text-secondary">{formatDate(row.meetingDate)}</span>,
-  },
-  {
-    key: 'meetingTime',
-    label: 'Time',
-    render: (row) => <span className="text-sm text-text-secondary">{row.meetingTime || '—'}</span>,
-  },
-  {
-    key: 'status',
-    label: 'Status',
-    render: (row) => (
-      <Badge variant={statusVariant[row.status] || 'gray'}>
-        {row.status?.charAt(0).toUpperCase() + row.status?.slice(1)}
-      </Badge>
-    ),
-  },
-]
-
 export default function AdminMeetingsPage() {
   const { connect } = useSocket()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
+  const [statsLoading, setStatsLoading] = useState(true)
+
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
-  const [stats, setStats] = useState({ pending: 0, approved: 0, completed: 0 })
 
+  const [selectedMeeting, setSelectedMeeting] = useState(null)
   const [showView, setShowView] = useState(false)
   const [showReschedule, setShowReschedule] = useState(false)
   const [showCancel, setShowCancel] = useState(false)
@@ -117,8 +62,9 @@ export default function AdminMeetingsPage() {
   const [rescheduleData, setRescheduleData] = useState({ meetingDate: '', meetingTime: '' })
   const [cancelReason, setCancelReason] = useState('')
   const [statusAction, setStatusAction] = useState({ status: '', adminNotes: '', meetingLink: '' })
-
   const [meetingHistory, setMeetingHistory] = useState([])
+
+  const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, completed: 0, cancelled: 0, rejected: 0 })
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -133,14 +79,6 @@ export default function AdminMeetingsPage() {
       setData(payload?.meetings || [])
       setTotalPages(payload?.pagination?.totalPages || 1)
       setTotal(payload?.pagination?.totalItems || 0)
-
-      const allRes = await meetingService.list({ limit: 100 })
-      const allMeetings = allRes?.data?.meetings || []
-      setStats({
-        pending: allMeetings.filter((m) => m.status === 'pending').length,
-        approved: allMeetings.filter((m) => m.status === 'approved').length,
-        completed: allMeetings.filter((m) => m.status === 'completed').length,
-      })
     } catch {
       toast.error('Failed to load meetings')
     } finally {
@@ -148,18 +86,46 @@ export default function AdminMeetingsPage() {
     }
   }, [page, search, statusFilter, typeFilter])
 
+  const fetchStats = useCallback(async () => {
+    setStatsLoading(true)
+    try {
+      const allRes = await meetingService.list({ limit: 1000 })
+      const allMeetings = allRes?.data?.meetings || []
+      setStats({
+        total: allMeetings.length,
+        pending: allMeetings.filter((m) => m.status === 'pending').length,
+        approved: allMeetings.filter((m) => m.status === 'approved').length,
+        completed: allMeetings.filter((m) => m.status === 'completed').length,
+        cancelled: allMeetings.filter((m) => m.status === 'cancelled').length,
+        rejected: allMeetings.filter((m) => m.status === 'rejected').length,
+      })
+    } catch {
+      // silent
+    } finally {
+      setStatsLoading(false)
+    }
+  }, [])
+
   useEffect(() => { fetchData() }, [fetchData])
+  useEffect(() => { fetchStats() }, [fetchStats])
   useEffect(() => { setPage(1) }, [search, statusFilter, typeFilter])
 
   useEffect(() => {
     const socket = connect()
     if (!socket) return
-
-    const handleNewMeeting = () => { fetchData() }
+    const handleNewMeeting = () => { fetchData(); fetchStats() }
     socket.on('newMeeting', handleNewMeeting)
-
     return () => { socket.off('newMeeting', handleNewMeeting) }
-  }, [connect, fetchData])
+  }, [connect, fetchData, fetchStats])
+
+  const statusDistribution = useMemo(() => {
+    const map = {}
+    data.forEach((m) => {
+      const s = m.status || 'other'
+      map[s] = (map[s] || 0) + 1
+    })
+    return Object.entries(map).map(([name, value]) => ({ name, value }))
+  }, [data])
 
   const openView = async (row) => {
     setSelected(row)
@@ -207,6 +173,7 @@ export default function AdminMeetingsPage() {
       toast.success(`Meeting ${statusAction.status}`)
       setShowStatusConfirm(false)
       fetchData()
+      fetchStats()
       if (showView) openView(selected)
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Failed to update status')
@@ -245,26 +212,13 @@ export default function AdminMeetingsPage() {
       toast.success('Meeting cancelled')
       setShowCancel(false)
       fetchData()
+      fetchStats()
       if (showView) openView(selected)
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Failed to cancel')
     } finally {
       setFormLoading(false)
     }
-  }
-
-  const getActions = (row) => {
-    const base = [{ icon: Eye, label: 'View', onClick: openView }]
-    if (row.status === 'pending') {
-      base.push({ icon: CheckCircle, label: 'Approve', onClick: () => openStatusAction(row, 'approved') })
-      base.push({ icon: XCircle, label: 'Reject', onClick: () => openStatusAction(row, 'rejected'), variant: 'danger' })
-    }
-    if (row.status === 'approved') {
-      base.push({ icon: CheckCircle, label: 'Complete', onClick: () => openStatusAction(row, 'completed') })
-      base.push({ icon: CalendarClock, label: 'Reschedule', onClick: () => openReschedule(row) })
-      base.push({ icon: Ban, label: 'Cancel', onClick: () => openCancel(row), variant: 'danger' })
-    }
-    return base
   }
 
   const timelineItems = meetingHistory.map((h) => ({
@@ -275,48 +229,92 @@ export default function AdminMeetingsPage() {
   }))
 
   return (
-    <>
-      <AdminListPage
-        title="Meetings"
-        description="Schedule and manage client meetings"
-        columns={columns}
-        data={data}
-        loading={loading}
-        searchValue={search}
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeInOut' }}
+      >
+        <Breadcrumb
+          items={[
+            { label: 'Meetings', href: '/admin/meetings' },
+            { label: 'Manage Meetings' },
+          ]}
+        />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.04, ease: 'easeInOut' }}
+        className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+      >
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Meetings</h1>
+          <p className="mt-1 text-sm text-text-muted">
+            Schedule and manage client meetings.
+          </p>
+        </div>
+      </motion.div>
+
+      <MeetingStatsCards stats={stats} loading={statsLoading} />
+
+      <MeetingFilterBar
+        search={search}
         onSearchChange={setSearch}
-        emptyTitle="No meetings found"
-        emptyDescription="No meetings match your current filters."
-        stats={[
-          { label: 'Total', value: total, color: 'from-primary to-primary' },
-          { label: 'Pending', value: stats.pending, color: 'from-yellow-500 to-orange-500' },
-          { label: 'Approved', value: stats.approved, color: 'from-green-500 to-emerald-500' },
-          { label: 'Completed', value: stats.completed, color: 'from-blue-500 to-cyan-500' },
-        ]}
-        filters={
-          <div className="flex gap-4">
-            <Select options={statusOptions} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-44" />
-            <Select options={meetingTypeOptions} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="w-40" />
-          </div>
-        }
-        pagination={{ page, totalPages, total, onPageChange: setPage }}
-        actions={getActions}
+        status={statusFilter}
+        onStatusChange={setStatusFilter}
+        meetingType={typeFilter}
+        onTypeChange={setTypeFilter}
       />
+
+      <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+        <div className="min-w-0">
+          <MeetingDataTable
+            data={data}
+            loading={loading}
+            selectedId={selectedMeeting?._id}
+            onSelect={setSelectedMeeting}
+            onView={openView}
+            onApprove={(m) => openStatusAction(m, 'approved')}
+            onReject={(m) => openStatusAction(m, 'rejected')}
+            onComplete={(m) => openStatusAction(m, 'completed')}
+            onReschedule={openReschedule}
+            onCancel={openCancel}
+            pagination={{
+              page,
+              totalPages,
+              total,
+              onPageChange: setPage,
+            }}
+          />
+        </div>
+
+        <div className="hidden xl:block">
+          <div className="sticky top-24">
+            <MeetingRightPanel
+              meeting={selectedMeeting}
+              statusDistribution={statusDistribution}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* View Details Modal */}
       <Modal isOpen={showView} onClose={() => setShowView(false)} title="Meeting Details" size="lg">
         {selected && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <div><span className="text-text-secondary">Client:</span> <span className="font-medium">{selected.name}</span></div>
-              <div><span className="text-text-secondary">Email:</span> {selected.email}</div>
-              <div><span className="text-text-secondary">Phone:</span> {selected.phone}</div>
+              <div><span className="text-text-secondary">Client:</span> <span className="font-medium text-white">{selected.name}</span></div>
+              <div><span className="text-text-secondary">Email:</span> <span className="text-white">{selected.email}</span></div>
+              <div><span className="text-text-secondary">Phone:</span> <span className="text-white">{selected.phone}</span></div>
               <div><span className="text-text-secondary">Service:</span> <Badge variant="primary">{selected.service?.title || '—'}</Badge></div>
               <div><span className="text-text-secondary">Type:</span> <Badge variant={selected.meetingType === 'online' ? 'blue' : 'primary'}>{selected.meetingType}</Badge></div>
               <div><span className="text-text-secondary">Status:</span> <Badge variant={statusVariant[selected.status]}>{selected.status?.charAt(0).toUpperCase() + selected.status?.slice(1)}</Badge></div>
-              <div><span className="text-text-secondary">Date:</span> {formatDate(selected.meetingDate)}</div>
-              <div><span className="text-text-secondary">Time:</span> {selected.meetingTime}</div>
-              <div><span className="text-text-secondary">Duration:</span> {selected.duration || 30} min</div>
-              <div><span className="text-text-secondary">Budget:</span> ₹{selected.budget?.toLocaleString() || '0'}</div>
+              <div><span className="text-text-secondary">Date:</span> <span className="text-white">{formatDate(selected.meetingDate)}</span></div>
+              <div><span className="text-text-secondary">Time:</span> <span className="text-white">{selected.meetingTime}</span></div>
+              <div><span className="text-text-secondary">Duration:</span> <span className="text-white">{selected.duration || 30} min</span></div>
+              <div><span className="text-text-secondary">Budget:</span> <span className="text-white">₹{selected.budget?.toLocaleString() || '0'}</span></div>
             </div>
 
             {selected.projectRequirements && (
@@ -444,6 +442,6 @@ export default function AdminMeetingsPage() {
           </div>
         </div>
       </Modal>
-    </>
+    </div>
   )
 }
