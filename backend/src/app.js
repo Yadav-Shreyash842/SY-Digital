@@ -42,18 +42,20 @@ app.use(compression());
 // CORS
 app.use(cookieParser());
 
-const allowedOrigins = [process.env.CLIENT_URL];
+const allowedOrigins = (process.env.CLIENT_URL || "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
 if (process.env.NODE_ENV !== "production") {
     allowedOrigins.push("http://localhost:5173", "http://localhost:3000");
 }
 
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        if (/\.vercel\.app$/.test(origin)) return callback(null, true);
+        callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
 }));
