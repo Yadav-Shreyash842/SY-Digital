@@ -17,8 +17,9 @@ export default function FileDropZone({
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef(null);
 
-  const isImage = accept.includes("image");
-  const isVideo = accept.includes("video");
+  const acceptStr = typeof accept === "string" ? accept : Object.keys(accept || {}).join(" ");
+  const isImage = acceptStr.includes("image");
+  const isVideo = acceptStr.includes("video");
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
@@ -122,7 +123,7 @@ export default function FileDropZone({
         <input
           ref={inputRef}
           type="file"
-          accept={accept}
+          accept={acceptStr}
           onChange={handleInputChange}
           className="hidden"
         />
