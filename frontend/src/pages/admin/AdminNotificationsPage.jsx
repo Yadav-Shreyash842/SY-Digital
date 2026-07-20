@@ -1,76 +1,37 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Bell, Calendar, DollarSign, Star, MessageSquare, User, Settings, Trash2, CheckCheck, Check } from 'lucide-react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { motion } from 'framer-motion'
+import { CheckCheck } from 'lucide-react'
 import toast from 'react-hot-toast'
-import AdminListPage from '../../components/dashboard/AdminListPage'
-import Badge from '../../components/ui/Badge'
+import Breadcrumb from '../../components/ui/Breadcrumb'
 import Button from '../../components/ui/Button'
-import Select from '../../components/ui/Select'
-import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import Modal from '../../components/ui/Modal'
+import useSocket from '../../hooks/useSocket'
 import notificationService from '../../services/notification.service'
-
-const typeOptions = [
-  { value: '', label: 'All Types' },
-  { value: 'meeting', label: 'Meeting' },
-  { value: 'payment', label: 'Payment' },
-  { value: 'review', label: 'Review' },
-  { value: 'message', label: 'Message' },
-  { value: 'user', label: 'User' },
-  { value: 'system', label: 'System' },
-]
-
-const readOptions = [
-  { value: '', label: 'All Status' },
-  { value: 'false', label: 'Unread' },
-  { value: 'true', label: 'Read' },
-]
-
-const typeIconMap = {
-  meeting: Calendar,
-  payment: DollarSign,
-  review: Star,
-  message: MessageSquare,
-  user: User,
-  system: Settings,
-}
-
-const typeBadgeVariant = {
-  meeting: 'blue',
-  payment: 'success',
-  review: 'primary',
-  message: 'default',
-  user: 'blue',
-  system: 'warning',
-}
-
-function timeAgo(dateStr) {
-  const now = Date.now()
-  const then = new Date(dateStr).getTime()
-  const seconds = Math.floor((now - then) / 1000)
-  if (seconds < 60) return 'just now'
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 30) return `${days}d ago`
-  const months = Math.floor(days / 30)
-  return `${months}mo ago`
-}
+import NotificationStatsCards from '../../components/admin/notifications/NotificationStatsCards'
+import NotificationFilterBar from '../../components/admin/notifications/NotificationFilterBar'
+import NotificationDataTable from '../../components/admin/notifications/NotificationDataTable'
+import NotificationRightPanel from '../../components/admin/notifications/NotificationRightPanel'
 
 export default function AdminNotificationsPage() {
+  const { connect } = useSocket()
+
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
+  const [statsLoading, setStatsLoading] = useState(true)
+
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
   const [readFilter, setReadFilter] = useState('')
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
-  const [statsData, setStatsData] = useState({ totalNotifications: 0, unreadNotifications: 0, readNotifications: 0 })
 
+  const [selectedNotification, setSelectedNotification] = useState(null)
   const [showDelete, setShowDelete] = useState(false)
   const [selected, setSelected] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
+
+  const [statsData, setStatsData] = useState({ total: 0, read: 0, unread: 0 })
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -84,7 +45,7 @@ export default function AdminNotificationsPage() {
       setData(payload?.notifications || [])
       setTotalPages(payload?.pagination?.totalPages || 1)
       setTotal(payload?.pagination?.total || 0)
-    } catch (err) {
+    } catch {
       toast.error('Failed to load notifications')
     } finally {
       setLoading(false)
@@ -92,24 +53,48 @@ export default function AdminNotificationsPage() {
   }, [page, search, typeFilter, readFilter])
 
   const fetchStats = useCallback(async () => {
+    setStatsLoading(true)
     try {
       const res = await notificationService.stats()
       const payload = res?.data
       setStatsData({
-        totalNotifications: payload?.totalNotifications || 0,
-        unreadNotifications: payload?.unreadNotifications || 0,
-        readNotifications: payload?.readNotifications || 0,
+        total: payload?.totalNotifications || 0,
+        read: payload?.readNotifications || 0,
+        unread: payload?.unreadNotifications || 0,
       })
     } catch {
+      // silent
+    } finally {
+      setStatsLoading(false)
     }
   }, [])
 
   useEffect(() => { fetchData() }, [fetchData])
   useEffect(() => { fetchStats() }, [fetchStats])
+  useEffect(() => { setPage(1) }, [search, typeFilter, readFilter])
 
   useEffect(() => {
-    setPage(1)
-  }, [search, typeFilter, readFilter])
+    const socket = connect()
+    if (!socket) return
+    const handleNew = () => { fetchData(); fetchStats() }
+    socket.on('newNotification', handleNew)
+    socket.on('allNotificationsRead', handleNew)
+    socket.on('notificationDeleted', handleNew)
+    return () => {
+      socket.off('newNotification', handleNew)
+      socket.off('allNotificationsRead', handleNew)
+      socket.off('notificationDeleted', handleNew)
+    }
+  }, [connect, fetchData, fetchStats])
+
+  const typeDistribution = useMemo(() => {
+    const map = {}
+    data.forEach((n) => {
+      const t = n.type || 'other'
+      map[t] = (map[t] || 0) + 1
+    })
+    return Object.entries(map).map(([name, value]) => ({ name, value }))
+  }, [data])
 
   const handleMarkRead = async (row) => {
     if (row.isRead) return
@@ -118,8 +103,8 @@ export default function AdminNotificationsPage() {
       setData((prev) => prev.map((n) => (n._id === row._id ? { ...n, isRead: true } : n)))
       setStatsData((prev) => ({
         ...prev,
-        unreadNotifications: Math.max(0, prev.unreadNotifications - 1),
-        readNotifications: prev.readNotifications + 1,
+        unread: Math.max(0, prev.unread - 1),
+        read: prev.read + 1,
       }))
       toast.success('Marked as read')
     } catch {
@@ -128,15 +113,15 @@ export default function AdminNotificationsPage() {
   }
 
   const handleMarkAllRead = async () => {
-    if (statsData.unreadNotifications === 0) return
+    if (statsData.unread === 0) return
     setActionLoading(true)
     try {
       await notificationService.markAllRead()
       setData((prev) => prev.map((n) => ({ ...n, isRead: true })))
       setStatsData((prev) => ({
         ...prev,
-        unreadNotifications: 0,
-        readNotifications: prev.totalNotifications,
+        unread: 0,
+        read: prev.total,
       }))
       toast.success('All notifications marked as read')
     } catch {
@@ -144,6 +129,11 @@ export default function AdminNotificationsPage() {
     } finally {
       setActionLoading(false)
     }
+  }
+
+  const openDelete = (row) => {
+    setSelected(row)
+    setShowDelete(true)
   }
 
   const handleDelete = async () => {
@@ -162,155 +152,95 @@ export default function AdminNotificationsPage() {
     }
   }
 
-  const columns = [
-    {
-      key: 'title',
-      label: 'Notification',
-      render: (row) => {
-        const Icon = typeIconMap[row.type] || Bell
-        return (
-          <button
-            onClick={() => handleMarkRead(row)}
-            className="flex items-start gap-3 text-left w-full"
-          >
-            <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-              row.type === 'meeting' ? 'bg-primary/15 text-primary' :
-              row.type === 'payment' ? 'bg-success/15 text-success' :
-              row.type === 'review' ? 'bg-primary/15 text-primary' :
-              row.type === 'message' ? 'bg-white/10 text-text-secondary' :
-              row.type === 'user' ? 'bg-primary/15 text-primary' :
-              'bg-warning/15 text-warning'
-            }`}>
-              <Icon strokeWidth={1.75} className="h-4 w-4" />
-            </div>
-            <div className="min-w-0">
-              <p className={`text-sm ${row.isRead ? 'font-normal text-text-secondary' : 'font-semibold text-white'}`}>
-                {row.title}
-              </p>
-              <p className="text-xs text-text-muted truncate max-w-xs">{row.message}</p>
-            </div>
-          </button>
-        )
-      },
-    },
-    {
-      key: 'type',
-      label: 'Type',
-      render: (row) => (
-        <Badge variant={typeBadgeVariant[row.type] || 'default'}>
-          {row.type?.charAt(0).toUpperCase() + row.type?.slice(1)}
-        </Badge>
-      ),
-    },
-    {
-      key: 'isRead',
-      label: 'Status',
-      render: (row) => (
-        <Badge variant={row.isRead ? 'success' : 'warning'}>
-          {row.isRead ? 'Read' : 'Unread'}
-        </Badge>
-      ),
-    },
-    {
-      key: 'createdAt',
-      label: 'Date',
-      render: (row) => (
-        <span className="text-sm text-text-secondary">{timeAgo(row.createdAt)}</span>
-      ),
-    },
-    {
-      key: 'actions',
-      label: '',
-      render: (row) => (
-        <div className="flex items-center gap-1">
-          {!row.isRead && (
-            <button
-              onClick={() => handleMarkRead(row)}
-              className="rounded-lg p-2 text-text-muted hover:bg-primary/10 hover:text-primary transition-colors"
-              title="Mark as read"
-            >
-              <Check strokeWidth={1.75} className="h-4 w-4" />
-            </button>
-          )}
-          <button
-            onClick={() => { setSelected(row); setShowDelete(true) }}
-            className="rounded-lg p-2 text-text-muted hover:bg-danger/10 hover:text-danger transition-colors"
-            title="Delete"
-          >
-            <Trash2 strokeWidth={1.75} className="h-4 w-4" />
-          </button>
-        </div>
-      ),
-    },
-  ]
-
-  const stats = [
-    {
-      icon: Bell,
-      label: 'Total Notifications',
-      value: statsData.totalNotifications,
-      color: 'from-primary to-primary',
-    },
-    {
-      icon: CheckCheck,
-      label: 'Read',
-      value: statsData.readNotifications,
-      color: 'from-success to-success',
-    },
-    {
-      icon: Bell,
-      label: 'Unread',
-      value: statsData.unreadNotifications,
-      color: 'from-warning to-warning',
-    },
-  ]
-
   return (
-    <>
-      <AdminListPage
-        title="Notifications"
-        description="View and manage system notifications"
-        columns={columns}
-        data={data}
-        tableLoading={loading}
-        searchValue={search}
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeInOut' }}
+      >
+        <Breadcrumb
+          items={[
+            { label: 'Notifications', href: '/admin/notifications' },
+            { label: 'Manage Notifications' },
+          ]}
+        />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.04, ease: 'easeInOut' }}
+        className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+      >
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Notifications</h1>
+          <p className="mt-1 text-sm text-text-muted">
+            View and manage system notifications
+          </p>
+        </div>
+        <Button
+          variant="light"
+          className="!h-10 !px-4 !text-sm self-start sm:self-auto"
+          onClick={handleMarkAllRead}
+          loading={actionLoading}
+          disabled={statsData.unread === 0}
+        >
+          <CheckCheck strokeWidth={1.75} className="h-4 w-4" />
+          Mark All as Read
+        </Button>
+      </motion.div>
+
+      <NotificationStatsCards stats={statsData} loading={statsLoading} />
+
+      <NotificationFilterBar
+        search={search}
         onSearchChange={setSearch}
-        stats={stats}
-        emptyTitle="No notifications"
-        emptyDescription="There are no notifications to display."
-        filters={
-          <div className="flex items-center gap-3">
-            <Select options={typeOptions} value={typeFilter} onChange={setTypeFilter} className="w-40" />
-            <Select options={readOptions} value={readFilter} onChange={setReadFilter} className="w-40" />
-          </div>
-        }
-        toolbar={
-          <div className="flex justify-end">
-            <Button
-              variant="light"
-              className="!h-10 !px-4 !text-sm"
-              onClick={handleMarkAllRead}
-              loading={actionLoading}
-              disabled={statsData.unreadNotifications === 0}
-            >
-              <CheckCheck strokeWidth={1.75} className="h-4 w-4" />
-              Mark All as Read
-            </Button>
-          </div>
-        }
-        pagination={{ page, totalPages, total, onPageChange: setPage }}
-        actionLabel={null}
+        type={typeFilter}
+        onTypeChange={setTypeFilter}
+        readStatus={readFilter}
+        onReadStatusChange={setReadFilter}
       />
 
-      <ConfirmDialog
-        isOpen={showDelete}
-        onClose={() => setShowDelete(false)}
-        onConfirm={handleDelete}
-        title="Delete Notification"
-        message={`Are you sure you want to delete "${selected?.title}"? This action cannot be undone.`}
-        loading={actionLoading}
-        variant="danger"
-      />
-    </>
+      <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+        <div className="min-w-0">
+          <NotificationDataTable
+            data={data}
+            loading={loading}
+            selectedId={selectedNotification?._id}
+            onSelect={setSelectedNotification}
+            onMarkRead={handleMarkRead}
+            onDelete={openDelete}
+            pagination={{
+              page,
+              totalPages,
+              total,
+              onPageChange: setPage,
+            }}
+          />
+        </div>
+
+        <div className="hidden xl:block">
+          <div className="sticky top-24">
+            <NotificationRightPanel
+              notification={selectedNotification}
+              typeDistribution={typeDistribution}
+            />
+          </div>
+        </div>
+      </div>
+
+      <Modal isOpen={showDelete} onClose={() => setShowDelete(false)} title="Delete Notification" size="md">
+        <div className="space-y-4">
+          <p className="text-sm text-text-secondary">
+            Are you sure you want to delete "<span className="font-semibold text-white">{selected?.title}</span>"? This action cannot be undone.
+          </p>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" onClick={() => setShowDelete(false)}>Cancel</Button>
+            <Button variant="danger" onClick={handleDelete} loading={actionLoading}>Delete</Button>
+          </div>
+        </div>
+      </Modal>
+    </div>
   )
 }
