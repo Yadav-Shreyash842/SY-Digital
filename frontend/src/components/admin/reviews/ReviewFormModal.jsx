@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Star } from 'lucide-react'
 import Modal from '../../ui/Modal'
 import Input from '../../ui/Input'
 import Textarea from '../../ui/Textarea'
