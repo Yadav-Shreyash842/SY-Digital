@@ -1,4 +1,4 @@
-import api from './api'
+import { apiClient } from './apiClient'
 
 export const sendContactMessage = async (formData) => {
   const payload = {
@@ -9,5 +9,5 @@ export const sendContactMessage = async (formData) => {
     service: formData.service !== 'other' ? formData.service : undefined,
   }
 
-  return api.post('/api/messages', payload)
+  return apiClient.post('/api/messages', payload)
 }

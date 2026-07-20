@@ -4,6 +4,7 @@ import Pagination from './Pagination'
 import EmptyState from '../feedback/EmptyState'
 import { Inbox } from 'lucide-react'
 import { cn } from '../../utils/cn'
+import { SkeletonTable } from './Skeleton'
 
 export default function Table({
   columns = [],
@@ -16,8 +17,13 @@ export default function Table({
   pagination,
   emptyTitle = 'No data found',
   emptyDescription = 'There are no records to display.',
+  loading = false,
   className = '',
 }) {
+  if (loading) {
+    return <SkeletonTable rows={6} theme={theme} />
+  }
+
   return (
     <div className={cn('space-y-4', className)}>
       {searchable && (
@@ -37,11 +43,11 @@ export default function Table({
       {data.length === 0 ? (
         <EmptyState icon={Inbox} title={emptyTitle} description={emptyDescription} theme={theme} />
       ) : (
-        <div className={cn('overflow-hidden rounded-[20px] border shadow-sm', theme === 'dark' ? 'border-white/8 bg-card-bg' : 'border-gray-200 bg-white')}>
+        <div className={cn('overflow-hidden rounded-card border shadow-sm', theme === 'dark' ? 'border-border bg-card-bg' : 'border-gray-200 bg-white')}>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className={cn('sticky top-0 z-10', theme === 'dark' ? 'bg-card-bg' : 'bg-gray-50')}>
-                <tr className={cn('border-b', theme === 'dark' ? 'border-white/8' : 'border-gray-100')}>
+                <tr className={cn('border-b', theme === 'dark' ? 'border-divider' : 'border-gray-100')}>
                   {columns.map((col) => (
                     <th
                       key={col.key}
@@ -59,10 +65,10 @@ export default function Table({
               <tbody>
                 {data.map((row, i) => (
                   <tr
-                    key={row.id || i}
+                    key={row._id || row.id || i}
                     className={cn(
                       'border-b transition-colors',
-                      theme === 'dark' ? 'border-white/5 hover:bg-white/5' : 'border-gray-50 hover:bg-gray-50/80',
+                      theme === 'dark' ? 'border-divider hover:bg-white/5' : 'border-gray-50 hover:bg-gray-50/80',
                     )}
                     style={{ height: '60px' }}
                   >

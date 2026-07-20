@@ -29,18 +29,18 @@ export const services = [
 ]
 
 export const projects = [
-  { slug: 'finflow-dashboard', title: 'FinFlow Dashboard', category: 'Web App', gradient: 'from-primary-purple/80 to-accent-blue/80', client: 'FinFlow Corp', year: '2026', description: 'A comprehensive financial analytics dashboard with real-time data visualization and AI-powered insights.' },
+  { slug: 'finflow-dashboard', title: 'FinFlow Dashboard', category: 'Web App', gradient: 'from-primary/80 to-accent-blue/80', client: 'FinFlow Corp', year: '2026', description: 'A comprehensive financial analytics dashboard with real-time data visualization and AI-powered insights.' },
   { slug: 'luxe-commerce', title: 'Luxe Commerce', category: 'E-Commerce', gradient: 'from-accent-blue/80 to-accent-cyan/80', client: 'Luxe Brands', year: '2025', description: 'Premium e-commerce platform with immersive product experiences and seamless checkout.' },
-  { slug: 'nova-brand', title: 'Nova Brand Identity', category: 'Branding', gradient: 'from-secondary-purple/80 to-primary-purple/80', client: 'Nova Inc', year: '2025', description: 'Complete brand identity system including logo, guidelines, and marketing collateral.' },
+  { slug: 'nova-brand', title: 'Nova Brand Identity', category: 'Branding', gradient: 'from-primary/80 to-primary/80', client: 'Nova Inc', year: '2025', description: 'Complete brand identity system including logo, guidelines, and marketing collateral.' },
   { slug: 'pulse-analytics', title: 'Pulse Analytics', category: 'SaaS Platform', gradient: 'from-accent-cyan/80 to-accent-blue/80', client: 'Pulse Labs', year: '2026', description: 'Enterprise SaaS analytics platform with custom reporting and team collaboration features.' },
-  { slug: 'elevate-mobile', title: 'Elevate Mobile', category: 'Mobile App', gradient: 'from-primary-purple/80 to-secondary-purple/80', client: 'Elevate Fitness', year: '2025', description: 'Cross-platform fitness app with personalized workout plans and progress tracking.' },
-  { slug: 'vertex-marketing', title: 'Vertex Marketing', category: 'Campaign', gradient: 'from-accent-blue/80 to-primary-purple/80', client: 'Vertex Group', year: '2026', description: 'Multi-channel digital marketing campaign that increased conversions by 340%.' },
+  { slug: 'elevate-mobile', title: 'Elevate Mobile', category: 'Mobile App', gradient: 'from-primary/80 to-primary/80', client: 'Elevate Fitness', year: '2025', description: 'Cross-platform fitness app with personalized workout plans and progress tracking.' },
+  { slug: 'vertex-marketing', title: 'Vertex Marketing', category: 'Campaign', gradient: 'from-accent-blue/80 to-primary/80', client: 'Vertex Group', year: '2026', description: 'Multi-channel digital marketing campaign that increased conversions by 340%.' },
 ]
 
 export const blogPosts = [
-  { slug: 'future-of-digital-agencies', title: 'The Future of Digital Agencies in 2026', excerpt: 'How AI, automation, and premium design are reshaping the agency landscape.', category: 'Industry', date: 'Jul 10, 2026', gradient: 'from-primary-purple/80 to-accent-blue/80' },
+  { slug: 'future-of-digital-agencies', title: 'The Future of Digital Agencies in 2026', excerpt: 'How AI, automation, and premium design are reshaping the agency landscape.', category: 'Industry', date: 'Jul 10, 2026', gradient: 'from-primary/80 to-accent-blue/80' },
   { slug: 'design-systems-at-scale', title: 'Building Design Systems That Scale', excerpt: 'A practical guide to creating maintainable design systems for growing products.', category: 'Design', date: 'Jul 5, 2026', gradient: 'from-accent-blue/80 to-accent-cyan/80' },
-  { slug: 'conversion-optimization-tips', title: '10 Conversion Optimization Tips', excerpt: 'Proven strategies to turn more visitors into paying customers.', category: 'Marketing', date: 'Jun 28, 2026', gradient: 'from-secondary-purple/80 to-primary-purple/80' },
+  { slug: 'conversion-optimization-tips', title: '10 Conversion Optimization Tips', excerpt: 'Proven strategies to turn more visitors into paying customers.', category: 'Marketing', date: 'Jun 28, 2026', gradient: 'from-primary/80 to-primary/80' },
   { slug: 'react-performance-guide', title: 'React Performance Optimization Guide', excerpt: 'Advanced techniques for building blazing-fast React applications.', category: 'Development', date: 'Jun 20, 2026', gradient: 'from-accent-cyan/80 to-accent-blue/80' },
 ]
 

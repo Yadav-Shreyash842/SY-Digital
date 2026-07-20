@@ -1,4 +1,4 @@
-const { createBlog , getAllBlogs , getBlogBySlug, updateBlog , deleteBlog , getFeaturedBlogs } = require("../services/blog.service");
+const { createBlog , getAllBlogs , getBlogBySlug, updateBlog , deleteBlog , getFeaturedBlogs , toggleFeatured, getBlogStats } = require("../services/blog.service");
 const ApiResponse = require("../utils/ApiResponse");
 
 const create = async (req, res, next) => {
@@ -179,6 +179,45 @@ const getFeatured = async (req, res, next) => {
 
 };
 
+const toggleFeaturedBlog = async (req, res, next) => {
+
+    try {
+
+        const blog = await toggleFeatured(req.params.id);
+
+        return res.status(200).json(
+
+            new ApiResponse(
+
+                200,
+
+                `Blog ${blog.isFeatured ? 'marked as featured' : 'unmarked as featured'}`,
+
+                blog
+
+            )
+
+        );
+
+    } catch (error) {
+
+        next(error);
+
+    }
+
+};
+
+const getStats = async (req, res, next) => {
+    try {
+        const stats = await getBlogStats();
+        return res.status(200).json(
+            new ApiResponse(200, "Blog stats fetched successfully", stats)
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     create,
     getAll,
@@ -186,5 +225,6 @@ module.exports = {
     update,
     remove,
     getFeatured,
-
+    toggleFeaturedBlog,
+    getStats,
 };

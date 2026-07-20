@@ -40,10 +40,10 @@ export default function Pricing() {
         transition={{ duration: 0.6, ease: 'easeInOut' }}
         className="mb-16 text-center"
       >
-        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-primary-purple">
+        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-primary">
           Pricing
         </span>
-        <h2 className="mb-6 text-[28px] font-bold sm:text-[32px] lg:text-[40px]">
+        <h2 className="mb-6 text-2xl font-bold sm:text-[32px] lg:text-[40px]">
           Plans Built for <span className="text-gradient">Every Stage</span>
         </h2>
         <p className="mx-auto max-w-2xl text-base leading-[160%] text-text-secondary sm:text-lg">
@@ -61,19 +61,19 @@ export default function Pricing() {
             transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeInOut' }}
             className={`relative rounded-[28px] border p-8 transition-all duration-400 ${
               plan.highlighted
-                ? 'border-primary-purple/50 bg-gradient-to-b from-primary-purple/10 to-card-bg shadow-[0_0_60px_rgba(124,58,237,0.2)] scale-[1.02] lg:scale-105'
+                ? 'border-primary/50 bg-gradient-to-b from-primary/10 to-card-bg shadow-[0_0_60px_rgba(239,68,68,0.2)] scale-[1.02] lg:scale-105'
                 : 'border-white/8 bg-card-bg premium-card'
             }`}
           >
             {plan.highlighted && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary-purple to-secondary-purple px-4 py-1 text-xs font-semibold">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary to-primary px-4 py-1 text-xs font-semibold">
                 Most Popular
               </span>
             )}
             <h3 className="mb-2 text-xl font-bold">{plan.name}</h3>
             <p className="mb-6 text-sm text-text-secondary">{plan.description}</p>
             <div className="mb-8">
-              <span className="text-4xl font-extrabold">{plan.price}</span>
+              <span className="text-2xl font-extrabold sm:text-3xl lg:text-4xl">{plan.price}</span>
               {plan.period && <span className="text-text-muted">{plan.period}</span>}
             </div>
             <ul className="mb-8 space-y-4">

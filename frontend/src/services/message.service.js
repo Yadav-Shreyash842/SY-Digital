@@ -25,6 +25,14 @@ export const messageService = {
     const res = await apiClient.patch(`/api/messages/${id}/reply`, { adminReply })
     return res?.data
   },
+  stats: async () => {
+    const res = await apiClient.get('/api/messages/dashboard/stats')
+    return res?.data
+  },
+  recentMessages: async () => {
+    const res = await apiClient.get('/api/messages/dashboard/recent')
+    return res?.data
+  },
 }
 
 export default messageService

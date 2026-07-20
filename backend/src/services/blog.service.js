@@ -327,6 +327,50 @@ const getFeaturedBlogs = async () => {
     return blogs;
 };
 
+const toggleFeatured = async (blogId) => {
+    assertValidBlogId(blogId);
+
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+        throw new ApiError(404, "Blog not found");
+    }
+
+    blog.isFeatured = !blog.isFeatured;
+    await blog.save();
+
+    return blog.toJSON();
+};
+
+const getBlogStats = async () => {
+    const [
+        total,
+        published,
+        draft,
+        archived,
+        featured,
+        viewsResult,
+    ] = await Promise.all([
+        Blog.countDocuments(),
+        Blog.countDocuments({ status: "published" }),
+        Blog.countDocuments({ status: "draft" }),
+        Blog.countDocuments({ status: "archived" }),
+        Blog.countDocuments({ isFeatured: true }),
+        Blog.aggregate([
+            { $group: { _id: null, totalViews: { $sum: "$views" } } },
+        ]),
+    ]);
+
+    return {
+        total,
+        published,
+        draft,
+        archived,
+        featured,
+        totalViews: viewsResult.length > 0 ? viewsResult[0].totalViews : 0,
+    };
+};
+
 module.exports = {
     createBlog,
     getAllBlogs,
@@ -334,4 +378,6 @@ module.exports = {
     updateBlog,
     deleteBlog,
     getFeaturedBlogs,
+    toggleFeatured,
+    getBlogStats,
 };

@@ -15,10 +15,16 @@ const {
     update,
     remove,
     getFeatured,
+    bulkDelete,
+    bulkUpdate,
+    getStats,
 } = require("../controllers/project.controller");
 
 const {
     projectValidator,
+    projectUpdateValidator,
+    bulkDeleteValidator,
+    bulkStatusValidator,
 } = require("../validators/project.validator");
 
 router.post(
@@ -41,6 +47,31 @@ router.get(
 );
 
 router.get(
+    "/stats",
+    auth,
+    authorize(ROLES.ADMIN),
+    getStats
+);
+
+router.post(
+    "/bulk-delete",
+    auth,
+    authorize(ROLES.ADMIN),
+    bulkDeleteValidator,
+    validate,
+    bulkDelete
+);
+
+router.patch(
+    "/bulk-status",
+    auth,
+    authorize(ROLES.ADMIN),
+    bulkStatusValidator,
+    validate,
+    bulkUpdate
+);
+
+router.get(
     "/:slug",
     getOne
 );
@@ -49,6 +80,8 @@ router.patch(
     "/:id",
     auth,
     authorize(ROLES.ADMIN),
+    projectUpdateValidator,
+    validate,
     update
 );
 

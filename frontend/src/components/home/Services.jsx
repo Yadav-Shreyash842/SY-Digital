@@ -33,10 +33,10 @@ export default function Services() {
         transition={{ duration: 0.6, ease: 'easeInOut' }}
         className="mb-16 text-center"
       >
-        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-primary-purple">
+        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-primary">
           Our Services
         </span>
-        <h2 className="mb-6 text-[28px] font-bold sm:text-[32px] lg:text-[40px]">
+        <h2 className="mb-6 text-2xl font-bold sm:text-[32px] lg:text-[40px]">
           Everything You Need to{' '}
           <span className="text-gradient">Scale Your Brand</span>
         </h2>
@@ -55,8 +55,8 @@ export default function Services() {
             transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeInOut' }}
             className="group premium-card p-8"
           >
-            <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-purple/20 to-accent-blue/20 transition-all duration-400 group-hover:shadow-[0_0_30px_rgba(124,58,237,0.3)]">
-              <service.icon strokeWidth={1.75} className="h-7 w-7 text-primary-purple" />
+            <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/20 transition-all duration-400 group-hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]">
+              <service.icon strokeWidth={1.75} className="h-7 w-7 text-primary" />
             </div>
             <h3 className="mb-3 text-xl font-bold">{service.title}</h3>
             <p className="mb-6 text-base leading-[160%] text-text-secondary">{service.description}</p>
@@ -72,7 +72,7 @@ export default function Services() {
             </div>
             <a
               href="#"
-              className="inline-flex items-center gap-1 text-sm font-semibold text-primary-purple transition-all group-hover:gap-2"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-all group-hover:gap-2"
             >
               Learn more
               <ArrowUpRight strokeWidth={1.75} className="h-4 w-4" />

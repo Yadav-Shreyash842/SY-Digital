@@ -17,8 +17,8 @@ export default function Switch({ label, checked, onChange, className = '', theme
         aria-checked={checked}
         onClick={() => onChange?.(!checked)}
         className={cn(
-          'relative h-7 w-12 shrink-0 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary-purple/30',
-          checked ? 'bg-primary-purple' : 'bg-white/10',
+          'relative h-7 w-12 shrink-0 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary/30',
+          checked ? 'bg-primary' : 'bg-white/10',
         )}
       >
         <span

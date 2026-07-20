@@ -5,13 +5,13 @@ import Logo from '../components/ui/Logo'
 export default function AuthLayout() {
   return (
     <div className="relative flex min-h-screen">
-      <div className="hidden w-1/2 hero-gradient lg:block">
+      <div className="hidden w-1/2 bg-gradient-to-br from-primary/20 via-accent-blue/10 to-primary-bg lg:block">
         <div className="flex h-full flex-col justify-between p-12">
           <Logo />
           <div>
             <h2 className="text-3xl font-bold leading-tight">
               Build Digital Excellence<br />
-              <span className="text-primary-purple">With SY Digital</span>
+              <span className="text-primary">With SY Digital</span>
             </h2>
             <p className="mt-4 max-w-md text-text-secondary">
               Premium digital agency platform for brands that demand excellence.

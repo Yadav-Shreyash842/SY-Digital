@@ -18,13 +18,13 @@ export default function AdminAnalyticsPage() {
     <div className="space-y-6">
       <PageHeader title="Analytics" description="Track website performance and user engagement" />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatsCard icon={Eye} label="Page Views" value="215K" change="+18.2%" color="from-primary-purple to-secondary-purple" theme="light" />
-        <StatsCard icon={Users} label="Unique Visitors" value="48.2K" change="+12.4%" color="from-accent-blue to-accent-cyan" theme="light" index={1} />
-        <StatsCard icon={TrendingUp} label="Conversion Rate" value="8.4%" change="+2.1%" color="from-secondary-purple to-primary-purple" theme="light" index={2} />
-        <StatsCard icon={BarChart3} label="Bounce Rate" value="32.1%" change="-4.3%" positive={false} color="from-accent-cyan to-accent-blue" theme="light" index={3} />
+        <StatsCard icon={Eye} label="Page Views" value="215K" change="+18.2%" color="from-primary to-primary" />
+        <StatsCard icon={Users} label="Unique Visitors" value="48.2K" change="+12.4%" color="from-accent-blue to-accent-cyan" index={1} />
+        <StatsCard icon={TrendingUp} label="Conversion Rate" value="8.4%" change="+2.1%" color="from-primary to-primary" index={2} />
+        <StatsCard icon={BarChart3} label="Bounce Rate" value="32.1%" change="-4.3%" positive={false} color="from-accent-cyan to-accent-blue" index={3} />
       </div>
-      <div className="rounded-[20px] border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-6 text-lg font-bold text-gray-900">Traffic Overview</h2>
+      <div className="rounded-card border border-border bg-card-bg p-6 shadow-sm">
+        <h2 className="mb-6 text-lg font-bold text-white">Traffic Overview</h2>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
@@ -32,8 +32,8 @@ export default function AdminAnalyticsPage() {
               <XAxis dataKey="month" stroke="#94A3B8" fontSize={12} />
               <YAxis stroke="#94A3B8" fontSize={12} />
               <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #E2E8F0' }} />
-              <Area type="monotone" dataKey="visits" stroke="#7C3AED" fill="#7C3AED" fillOpacity={0.1} strokeWidth={2} />
-              <Area type="monotone" dataKey="conversions" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.1} strokeWidth={2} />
+              <Area type="monotone" dataKey="visits" stroke="#EF4444" fill="#EF4444" fillOpacity={0.1} strokeWidth={2} />
+              <Area type="monotone" dataKey="conversions" stroke="#EF4444" fill="#EF4444" fillOpacity={0.1} strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

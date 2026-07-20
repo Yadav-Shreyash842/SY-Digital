@@ -1,5 +1,6 @@
-const { emitToAdmins } = require("../socket/socketEmitter");
+const { emitToAdmins, emitToClient } = require("../socket/socketEmitter");
 const Message = require("../models/Message");
+const User = require("../models/User");
 const Service = require("../models/Service");
 const ApiError = require("../utils/ApiError");
 const logger = require("../middlewares/logger");
@@ -311,6 +312,22 @@ try {
         message,
 
     });
+
+} catch (error) {
+
+    logger.warn(`[Socket.IO] ${error.message}`);
+
+}
+
+try {
+
+    const clientUser = await User.findOne({ email: message.email }).select("_id");
+
+    if (clientUser) {
+
+        emitToClient(clientUser._id, "messageReplied", { message });
+
+    }
 
 } catch (error) {
 

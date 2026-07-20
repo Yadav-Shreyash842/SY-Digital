@@ -45,8 +45,8 @@ export default function ContactPage() {
           <div className="lg:col-span-2 space-y-6">
             {contactInfo.map(({ icon: Icon, label, value }) => (
               <div key={label} className="flex items-start gap-4 rounded-[24px] border border-white/8 bg-card-bg p-6">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-purple/20">
-                  <Icon strokeWidth={1.75} className="h-6 w-6 text-primary-purple" />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/20">
+                  <Icon strokeWidth={1.75} className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm text-text-muted">{label}</p>

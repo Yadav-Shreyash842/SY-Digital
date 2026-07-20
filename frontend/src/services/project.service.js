@@ -7,6 +7,12 @@ export const projectService = {
     return res.data;
   },
 
+  // Get project stats
+  stats: async () => {
+    const res = await apiClient.get("/api/projects/stats");
+    return res.data;
+  },
+
   // Get featured projects
   featured: async () => {
     const res = await apiClient.get("/api/projects/featured");
@@ -34,6 +40,18 @@ export const projectService = {
   // Delete project
   remove: async (id) => {
     const res = await apiClient.delete(`/api/projects/${id}`);
+    return res.data;
+  },
+
+  // Bulk delete projects
+  bulkDelete: async (ids) => {
+    const res = await apiClient.post("/api/projects/bulk-delete", { ids });
+    return res.data;
+  },
+
+  // Bulk update project status
+  bulkUpdateStatus: async (ids, status) => {
+    const res = await apiClient.patch("/api/projects/bulk-status", { ids, status });
     return res.data;
   },
 };

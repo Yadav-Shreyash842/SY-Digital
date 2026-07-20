@@ -82,6 +82,25 @@ const serviceSchema = new mongoose.Schema(
             default: false,
         },
 
+        revenue: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+
+        rating: {
+            type: Number,
+            default: 0,
+            min: 0,
+            max: 5,
+        },
+
+        bookings: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+
         status: {
             type: String,
             enum: ["draft", "published", "archived"],

@@ -27,7 +27,7 @@ export default function Pagination({ currentPage = 1, totalPages = 1, onPageChan
           className={cn(
             'flex h-10 w-10 items-center justify-center rounded-xl text-sm font-semibold transition-colors',
             page === currentPage
-              ? 'bg-primary-purple text-white'
+              ? 'bg-primary text-white shadow-sm'
               : theme === 'dark'
                 ? 'text-text-secondary hover:bg-white/5'
                 : 'text-gray-600 hover:bg-gray-100',

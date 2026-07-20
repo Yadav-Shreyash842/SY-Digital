@@ -88,6 +88,12 @@ const projectSchema = new mongoose.Schema(
             type: Date,
         },
 
+        revenue: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+
         isFeatured: {
             type: Boolean,
             default: false,

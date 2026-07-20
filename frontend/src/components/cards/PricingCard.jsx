@@ -13,19 +13,19 @@ export default function PricingCard({ name, price, period, description, features
       className={cn(
         'relative rounded-[28px] border p-8 transition-all duration-400',
         highlighted
-          ? 'border-primary-purple/50 bg-gradient-to-b from-primary-purple/10 to-card-bg shadow-[0_0_60px_rgba(124,58,237,0.2)] scale-[1.02] lg:scale-105'
+          ? 'border-primary/50 bg-gradient-to-b from-primary/10 to-card-bg shadow-[0_0_60px_rgba(239,68,68,0.2)] scale-[1.02] lg:scale-105'
           : 'border-white/8 bg-card-bg premium-card',
       )}
     >
       {highlighted && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary-purple to-secondary-purple px-4 py-1 text-xs font-semibold">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary to-primary px-4 py-1 text-xs font-semibold">
           Most Popular
         </span>
       )}
       <h3 className="mb-2 text-xl font-bold">{name}</h3>
       <p className="mb-6 text-sm text-text-secondary">{description}</p>
       <div className="mb-8">
-        <span className="text-4xl font-extrabold">{price}</span>
+        <span className="text-2xl font-bold sm:text-3xl lg:text-4xl">{price}</span>
         {period && <span className="text-text-muted">{period}</span>}
       </div>
       <ul className="mb-8 space-y-4">

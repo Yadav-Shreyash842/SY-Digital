@@ -1,6 +1,10 @@
 import { apiClient } from './apiClient'
 
 export const blogService = {
+  stats: async () => {
+    const res = await apiClient.get('/api/blogs/stats')
+    return res?.data
+  },
   list: async (params) => {
     const res = await apiClient.get('/api/blogs', { params })
     return res?.data
@@ -19,6 +23,10 @@ export const blogService = {
   },
   remove: async (id) => {
     const res = await apiClient.delete(`/api/blogs/${id}`)
+    return res?.data
+  },
+  featured: async (id) => {
+    const res = await apiClient.patch(`/api/blogs/${id}/featured`)
     return res?.data
   },
 }

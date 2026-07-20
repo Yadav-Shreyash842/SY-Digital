@@ -32,7 +32,7 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer id="contact" className="border-t border-white/8 bg-secondary-bg">
+    <footer id="contact" className="border-t border-border bg-secondary-bg">
       <div className="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
         <div className="mx-auto max-w-[1200px]">
           <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
@@ -47,7 +47,7 @@ export default function Footer() {
                     key={label}
                     href={href}
                     aria-label={label}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-text-secondary transition-all duration-300 hover:border-primary-purple/50 hover:text-white hover:shadow-[0_0_20px_rgba(124,58,237,0.2)]"
+                    className="flex h-10 w-10 items-center justify-center rounded-btn border border-border bg-white/5 text-text-secondary transition-all duration-300 hover:border-primary/50 hover:text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]"
                   >
                     <Icon strokeWidth={1.75} className="h-5 w-5" />
                   </a>
@@ -85,30 +85,30 @@ export default function Footer() {
               <h4 className="mb-6 text-sm font-semibold uppercase tracking-wider text-white">Contact</h4>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3 text-text-secondary">
-                  <Mail strokeWidth={1.75} className="mt-0.5 h-5 w-5 shrink-0 text-primary-purple" />
+                  <Mail strokeWidth={1.75} className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                   <span>hello@sydigital.com</span>
                 </li>
                 <li className="flex items-start gap-3 text-text-secondary">
-                  <Phone strokeWidth={1.75} className="mt-0.5 h-5 w-5 shrink-0 text-primary-purple" />
+                  <Phone strokeWidth={1.75} className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                   <span>+1 (555) 123-4567</span>
                 </li>
                 <li className="flex items-start gap-3 text-text-secondary">
-                  <MapPin strokeWidth={1.75} className="mt-0.5 h-5 w-5 shrink-0 text-primary-purple" />
+                  <MapPin strokeWidth={1.75} className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                   <span>San Francisco, CA 94102</span>
                 </li>
               </ul>
               <div className="mt-6 space-y-2">
-                <Link to="/admin" className="block text-sm text-text-muted hover:text-primary-purple">
+                <Link to="/admin" className="block text-sm text-text-muted hover:text-primary">
                   Admin Dashboard →
                 </Link>
-                <Link to="/client" className="block text-sm text-text-muted hover:text-primary-purple">
+                <Link to="/client" className="block text-sm text-text-muted hover:text-primary">
                   Client Dashboard →
                 </Link>
               </div>
             </div>
           </div>
 
-          <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/8 pt-8 sm:flex-row">
+          <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">
             <p className="text-sm text-text-muted">
               © {new Date().getFullYear()} SY Digital. All rights reserved.
             </p>

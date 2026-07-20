@@ -15,7 +15,7 @@ export default function ProgressBar({ value = 0, max = 100, className = '', show
         <div
           className={cn(
             'h-full rounded-full transition-all duration-600 ease-in-out',
-            variant === 'gradient' ? 'bg-gradient-to-r from-primary-purple to-accent-blue' : 'bg-success',
+            variant === 'gradient' ? 'bg-gradient-to-r from-primary to-accent-orange' : 'bg-success',
           )}
           style={{ width: `${percent}%` }}
           role="progressbar"

@@ -21,6 +21,10 @@ export const notificationService = {
     const res = await apiClient.delete(`/api/notifications/${id}`)
     return res?.data
   },
+  stats: async () => {
+    const res = await apiClient.get('/api/notifications/dashboard/stats')
+    return res?.data
+  },
 }
 
 export default notificationService

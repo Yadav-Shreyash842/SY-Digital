@@ -18,6 +18,9 @@ export default function AdminListPage({
   pagination,
   emptyTitle,
   emptyDescription,
+  filters,
+  toolbar,
+  tableLoading = false,
 }) {
   return (
     <div className="space-y-6">
@@ -26,7 +29,7 @@ export default function AdminListPage({
         description={description}
         action={
           actionLabel && (
-            <Button variant="light" className="!h-11 !px-5 !text-sm" onClick={onAction}>
+            <Button className="!h-11 !px-5 !text-sm" onClick={onAction}>
               <Plus strokeWidth={1.75} className="h-4 w-4" />
               {actionLabel}
             </Button>
@@ -36,20 +39,23 @@ export default function AdminListPage({
       {stats.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((stat, i) => (
-            <StatsCard key={stat.label} {...stat} theme="light" index={i} />
+            <StatsCard key={stat.label} {...stat} index={i} />
           ))}
         </div>
       )}
+      {filters && <div>{filters}</div>}
+      {toolbar && <div>{toolbar}</div>}
       <Table
         columns={columns}
         data={data}
-        theme="light"
+        theme="dark"
         searchable={searchable}
         searchValue={searchValue}
         onSearchChange={onSearchChange}
         pagination={pagination}
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}
+        loading={tableLoading}
       />
     </div>
   )

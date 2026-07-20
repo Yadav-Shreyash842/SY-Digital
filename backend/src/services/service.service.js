@@ -21,6 +21,9 @@ const SERVICE_SELECT = [
     "features",
     "image",
     "isFeatured",
+    "revenue",
+    "rating",
+    "bookings",
     "status",
     "createdBy",
     "createdAt",
@@ -314,6 +317,9 @@ const updateService = async (serviceId, updateData) => {
         "features",
         "image",
         "isFeatured",
+        "revenue",
+        "rating",
+        "bookings",
         "status",
         "slug",
     ];
@@ -366,6 +372,48 @@ const getFeaturedServices = async () => {
 
 };
 
+const getServiceStats = async () => {
+    const [
+        totalServices,
+        publishedServices,
+        draftServices,
+        archivedServices,
+        featuredServices,
+        revenueResult,
+        ratingResult,
+        bookingsResult,
+    ] = await Promise.all([
+        Service.countDocuments(),
+        Service.countDocuments({ status: "published" }),
+        Service.countDocuments({ status: "draft" }),
+        Service.countDocuments({ status: "archived" }),
+        Service.countDocuments({ isFeatured: true }),
+        Service.aggregate([
+            { $group: { _id: null, total: { $sum: "$revenue" } } },
+        ]),
+        Service.aggregate([
+            { $match: { rating: { $gt: 0 } } },
+            { $group: { _id: null, average: { $avg: "$rating" } } },
+        ]),
+        Service.aggregate([
+            { $group: { _id: null, total: { $sum: "$bookings" } } },
+        ]),
+    ]);
+
+    return {
+        totalServices,
+        publishedServices,
+        draftServices,
+        archivedServices,
+        featuredServices,
+        totalRevenue: revenueResult[0]?.total || 0,
+        averageRating: ratingResult[0]?.average
+            ? Math.round(ratingResult[0].average * 10) / 10
+            : 0,
+        totalBookings: bookingsResult[0]?.total || 0,
+    };
+};
+
 module.exports = {
     createService,
     getAllServices,
@@ -373,4 +421,5 @@ module.exports = {
     updateService,
     deleteService,
     getFeaturedServices,
+    getServiceStats,
 };

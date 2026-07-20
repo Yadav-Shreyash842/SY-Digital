@@ -12,7 +12,7 @@ export default function Alert({ type = 'info', title, children, onClose, classNa
   const { icon: Icon, className: typeClass } = config[type]
 
   return (
-    <div className={cn('flex gap-3 rounded-2xl border p-4', typeClass, className)} role="alert">
+    <div className={cn('flex gap-3 rounded-card border p-4', typeClass, className)} role="alert">
       <Icon strokeWidth={1.75} className="mt-0.5 h-5 w-5 shrink-0" />
       <div className="flex-1">
         {title && <p className="mb-1 font-semibold">{title}</p>}

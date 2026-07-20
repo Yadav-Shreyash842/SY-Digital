@@ -1,5 +1,3 @@
-import React from 'react'
-
 export default function ErrorPage({ title = 'Something went wrong', message }) {
   return (
     <div className="min-h-[50vh] flex flex-col items-center justify-center">

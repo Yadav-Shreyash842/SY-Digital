@@ -10,12 +10,12 @@ export default function ErrorState({ title = 'Something went wrong', description
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeInOut' }}
       className={cn(
-        'flex flex-col items-center justify-center rounded-[20px] border px-6 py-16 text-center',
+        'flex flex-col items-center justify-center rounded-card border px-6 py-16 text-center',
         theme === 'dark' ? 'border-danger/20 bg-danger/5' : 'border-red-200 bg-red-50',
         className,
       )}
     >
-      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-danger/10">
+      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-btn bg-danger/10">
         <AlertCircle strokeWidth={1.75} className="h-8 w-8 text-danger" />
       </div>
       <h3 className={cn('mb-2 text-lg font-bold', theme === 'dark' ? 'text-white' : 'text-gray-900')}>{title}</h3>

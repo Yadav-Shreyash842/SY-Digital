@@ -3,7 +3,6 @@ import {
   BarChart3,
   Briefcase,
   FolderKanban,
-  Image,
   FileText,
   Star,
   Calendar,
@@ -16,9 +15,8 @@ import {
   Settings,
   User,
   Receipt,
-  LifeBuoy,
-  Clock3,
-  Files,
+  ClipboardList,
+  Send,
 } from 'lucide-react'
 
 export const publicNavLinks = [
@@ -32,14 +30,15 @@ export const publicNavLinks = [
 export const adminNavLinks = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/admin' },
   { icon: BarChart3, label: 'Analytics', to: '/admin/analytics' },
-  { icon: Briefcase, label: 'Services', to: '/admin/services' },
   { icon: FolderKanban, label: 'Projects', to: '/admin/projects' },
-  { icon: Image, label: 'Portfolio', to: '/admin/portfolio' },
+  { icon: ClipboardList, label: 'Project Requests', to: '/admin/project-requests' },
+  { icon: Briefcase, label: 'Services', to: '/admin/services' },
+  { icon: Receipt, label: 'Portfolio', to: '/admin/portfolio' },
   { icon: FileText, label: 'Blogs', to: '/admin/blogs' },
   { icon: Star, label: 'Reviews', to: '/admin/reviews' },
+  { icon: MessageSquare, label: 'Messages', to: '/admin/messages' },
   { icon: Calendar, label: 'Meetings', to: '/admin/meetings' },
   { icon: CreditCard, label: 'Payments', to: '/admin/payments' },
-  { icon: MessageSquare, label: 'Messages', to: '/admin/messages' },
   { icon: Bell, label: 'Notifications', to: '/admin/notifications' },
   { icon: HardDrive, label: 'Media Manager', to: '/admin/media' },
   { icon: Users, label: 'Users', to: '/admin/users' },
@@ -51,13 +50,10 @@ export const adminNavLinks = [
 export const clientNavLinks = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/client' },
   { icon: FolderKanban, label: 'Projects', to: '/client/projects' },
+  { icon: Send, label: 'Request Project', to: '/client/request-project' },
   { icon: MessageSquare, label: 'Messages', to: '/client/messages' },
   { icon: Calendar, label: 'Meetings', to: '/client/meetings' },
   { icon: Receipt, label: 'Invoices', to: '/client/invoices' },
-  { icon: Files, label: 'Files', to: '/client/files' },
-  { icon: Bell, label: 'Notifications', to: '/client/notifications' },
-  { icon: Clock3, label: 'Activity', to: '/client/activity' },
-  { icon: LifeBuoy, label: 'Support', to: '/client/support' },
   { icon: User, label: 'Profile', to: '/client/profile' },
   { icon: Settings, label: 'Settings', to: '/client/settings' },
 ]

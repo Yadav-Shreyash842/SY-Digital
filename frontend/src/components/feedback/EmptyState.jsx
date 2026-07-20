@@ -17,14 +17,14 @@ export default function EmptyState({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, ease: 'easeInOut' }}
       className={cn(
-        'flex flex-col items-center justify-center rounded-[20px] border px-6 py-16 text-center',
-        theme === 'dark' ? 'border-white/8 bg-card-bg' : 'border-gray-200 bg-white',
+        'flex flex-col items-center justify-center rounded-card border px-6 py-16 text-center',
+        theme === 'dark' ? 'border-border bg-card-bg' : 'border-gray-200 bg-white',
         className,
       )}
     >
       {Icon && (
         <div className={cn(
-          'mb-6 flex h-16 w-16 items-center justify-center rounded-2xl',
+          'mb-6 flex h-16 w-16 items-center justify-center rounded-btn',
           theme === 'dark' ? 'bg-white/5' : 'bg-gray-100',
         )}>
           <Icon strokeWidth={1.75} className={cn('h-8 w-8', theme === 'dark' ? 'text-text-muted' : 'text-gray-400')} />

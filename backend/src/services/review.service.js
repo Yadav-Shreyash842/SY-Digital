@@ -308,77 +308,35 @@ const getReviewStats = async () => {
     const [
 
         totalReviews,
-
         approvedReviews,
-
         pendingReviews,
-
         rejectedReviews,
+        featuredReviews,
 
     ] = await Promise.all([
 
         Review.countDocuments(),
-
-        Review.countDocuments({
-
-            status: "approved",
-
-        }),
-
-        Review.countDocuments({
-
-            status: "pending",
-
-        }),
-
-        Review.countDocuments({
-
-            status: "rejected",
-
-        }),
+        Review.countDocuments({ status: "approved" }),
+        Review.countDocuments({ status: "pending" }),
+        Review.countDocuments({ status: "rejected" }),
+        Review.countDocuments({ featured: true }),
 
     ]);
 
     const averageRating = await Review.aggregate([
 
-        {
-
-            $match: {
-
-                status: "approved",
-
-            },
-
-        },
-
-        {
-
-            $group: {
-
-                _id: null,
-
-                averageRating: {
-
-                    $avg: "$rating",
-
-                },
-
-            },
-
-        },
+        { $match: { status: "approved" } },
+        { $group: { _id: null, averageRating: { $avg: "$rating" } } },
 
     ]);
 
     return {
 
         totalReviews,
-
         approvedReviews,
-
         pendingReviews,
-
         rejectedReviews,
-
+        featuredReviews,
         averageRating:
 
             averageRating.length > 0

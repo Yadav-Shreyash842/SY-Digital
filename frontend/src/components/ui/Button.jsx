@@ -2,21 +2,29 @@ import { motion } from 'framer-motion'
 import Spinner from './Spinner'
 import { cn } from '../../utils/cn'
 
+const sizeClasses = {
+  xs: 'h-8 px-4 text-xs gap-1.5',
+  sm: 'h-10 px-5 text-sm gap-2',
+  md: 'h-12 px-6 text-sm gap-2',
+  lg: 'h-14 px-8 text-base gap-2.5',
+  xl: 'h-16 px-10 text-base gap-3',
+}
+
 const variants = {
-  primary: 'btn-primary text-white font-semibold rounded-full h-[52px] px-8 text-base',
-  secondary: 'btn-secondary text-white font-semibold rounded-full h-[52px] px-8 text-base',
-  ghost: 'text-text-secondary hover:text-white font-medium transition-colors duration-300',
-  nav: 'btn-primary text-white font-semibold rounded-full py-3.5 px-7 text-sm',
-  outline: 'border border-white/10 bg-transparent text-white font-semibold rounded-full h-[52px] px-8 hover:bg-white/5 transition-all duration-300',
-  light: 'bg-primary-purple text-white font-semibold rounded-full h-[52px] px-8 hover:bg-secondary-purple transition-colors duration-300 shadow-[0_4px_20px_rgba(124,58,237,0.3)]',
-  lightOutline: 'border border-gray-200 bg-white text-gray-900 font-semibold rounded-full h-[52px] px-8 hover:bg-gray-50 transition-all duration-300',
-  danger: 'bg-danger text-white font-semibold rounded-full h-[52px] px-8 hover:opacity-90 transition-opacity duration-300',
-  sm: 'btn-primary text-white font-semibold rounded-full h-10 px-5 text-sm',
+  primary: 'bg-primary text-white hover:bg-primary-hover active:bg-primary-active shadow-[0_4px_20px_rgba(239,68,68,0.3)]',
+  secondary: 'border border-border bg-white/[0.03] text-white hover:bg-white/[0.06]',
+  ghost: 'text-text-secondary hover:text-white',
+  outline: 'border border-border bg-transparent text-white hover:bg-white/5',
+  danger: 'bg-danger text-white hover:opacity-90',
+  nav: 'bg-primary text-white hover:bg-primary-hover active:bg-primary-active shadow-[0_4px_20px_rgba(239,68,68,0.3)]',
+  light: 'bg-primary text-white hover:bg-primary-hover active:bg-primary-active shadow-[0_4px_20px_rgba(239,68,68,0.3)]',
+  lightOutline: 'border border-gray-200 bg-white text-gray-900 hover:bg-gray-50',
 }
 
 export default function Button({
   children,
   variant = 'primary',
+  size = 'md',
   className = '',
   as = 'button',
   href,
@@ -27,14 +35,15 @@ export default function Button({
   const isDisabled = disabled || loading
   const classes = cn(
     variants[variant] || variants.primary,
-    'inline-flex items-center justify-center gap-2',
+    sizeClasses[size] || sizeClasses.md,
+    'inline-flex items-center justify-center font-semibold rounded-btn transition-all duration-300',
     isDisabled && 'pointer-events-none opacity-60',
     className,
   )
 
   const content = (
     <>
-      {loading && <Spinner size="sm" className={variant.includes('light') ? 'border-gray-300 border-t-primary-purple' : ''} />}
+      {loading && <Spinner size="sm" />}
       {children}
     </>
   )

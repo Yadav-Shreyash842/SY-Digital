@@ -12,8 +12,8 @@ export default function ServiceCard({ icon: Icon, title, description, tags = [],
       className={cn('group premium-card p-8', className)}
     >
       {Icon && (
-        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-purple/20 to-accent-blue/20 transition-all duration-400 group-hover:shadow-[0_0_30px_rgba(124,58,237,0.3)]">
-          <Icon strokeWidth={1.75} className="h-7 w-7 text-primary-purple" />
+        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/20 transition-all duration-400 group-hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]">
+          <Icon strokeWidth={1.75} className="h-7 w-7 text-primary" />
         </div>
       )}
       <h3 className="mb-3 text-xl font-bold">{title}</h3>
@@ -27,7 +27,7 @@ export default function ServiceCard({ icon: Icon, title, description, tags = [],
           ))}
         </div>
       )}
-      <a href={href} className="inline-flex items-center gap-1 text-sm font-semibold text-primary-purple transition-all group-hover:gap-2">
+      <a href={href} className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-all group-hover:gap-2">
         Learn more <ArrowUpRight strokeWidth={1.75} className="h-4 w-4" />
       </a>
     </motion.div>

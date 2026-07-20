@@ -1,14 +1,14 @@
 export const setItem = (key, value) => {
   try {
     localStorage.setItem(key, JSON.stringify(value))
-  } catch (e) {}
+  } catch { /* ignore */ }
 }
 
 export const getItem = (key) => {
   try {
     const raw = localStorage.getItem(key)
     return raw ? JSON.parse(raw) : null
-  } catch (e) {
+  } catch {
     return null
   }
 }
@@ -16,5 +16,5 @@ export const getItem = (key) => {
 export const removeItem = (key) => {
   try {
     localStorage.removeItem(key)
-  } catch (e) {}
+  } catch { /* ignore */ }
 }

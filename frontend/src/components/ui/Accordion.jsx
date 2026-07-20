@@ -14,8 +14,8 @@ export default function Accordion({ items = [], theme = 'dark', className = '' }
           <div
             key={item.question || item.title}
             className={cn(
-              'overflow-hidden rounded-2xl border transition-colors duration-300',
-              theme === 'dark' ? 'border-white/8 bg-card-bg' : 'border-gray-200 bg-white',
+              'overflow-hidden rounded-card border transition-colors duration-300',
+              theme === 'dark' ? 'border-border bg-card-bg' : 'border-gray-200 bg-white',
             )}
           >
             <button

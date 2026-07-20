@@ -24,10 +24,10 @@ export default function Select({
         <select
           id={inputId}
           className={cn(
-            'h-14 w-full appearance-none rounded-2xl border px-4 pr-10 text-base transition-all duration-300 focus:outline-none focus:ring-2',
+            'h-12 w-full appearance-none rounded-input border px-4 pr-10 text-base transition-all duration-300 focus:outline-none focus:ring-2',
             theme === 'dark'
-              ? 'border-white/10 bg-white/5 text-white focus:border-primary-purple focus:ring-primary-purple/20'
-              : 'border-gray-200 bg-white text-gray-900 focus:border-primary-purple focus:ring-primary-purple/20',
+              ? 'border-border bg-white/5 text-white focus:border-primary focus:ring-primary/20'
+              : 'border-gray-200 bg-white text-gray-900 focus:border-primary focus:ring-primary/20',
             error && 'border-danger',
           )}
           aria-invalid={!!error}

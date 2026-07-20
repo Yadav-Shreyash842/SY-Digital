@@ -28,7 +28,7 @@ export default function Avatar({ src, name, size = 'md', className = '' }) {
   return (
     <div
       className={cn(
-        'flex items-center justify-center rounded-xl bg-gradient-to-br from-primary-purple to-accent-blue font-bold text-white',
+        'flex items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent-orange font-bold text-white',
         sizes[size],
         className,
       )}

@@ -8,8 +8,8 @@ export default function StatsCard({ icon: Icon, label, value, change, positive =
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.08, ease: 'easeInOut' }}
       className={cn(
-        'rounded-[20px] border p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md',
-        theme === 'dark' ? 'border-white/8 bg-card-bg' : 'border-gray-200 bg-white',
+        'rounded-card border p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md',
+        theme === 'dark' ? 'border-border bg-card-bg' : 'border-gray-200 bg-white',
         className,
       )}
     >

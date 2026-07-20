@@ -6,7 +6,7 @@ const projects = [
   {
     title: 'FinFlow Dashboard',
     category: 'Web App',
-    gradient: 'from-primary-purple/80 to-accent-blue/80',
+    gradient: 'from-primary/80 to-primary/80',
   },
   {
     title: 'Luxe Commerce',
@@ -16,7 +16,7 @@ const projects = [
   {
     title: 'Nova Brand Identity',
     category: 'Branding',
-    gradient: 'from-secondary-purple/80 to-primary-purple/80',
+    gradient: 'from-primary/80 to-primary/80',
   },
   {
     title: 'Pulse Analytics',
@@ -26,12 +26,12 @@ const projects = [
   {
     title: 'Elevate Mobile',
     category: 'Mobile App',
-    gradient: 'from-primary-purple/80 to-secondary-purple/80',
+    gradient: 'from-primary/80 to-primary/80',
   },
   {
     title: 'Vertex Marketing',
     category: 'Campaign',
-    gradient: 'from-accent-blue/80 to-primary-purple/80',
+    gradient: 'from-primary/80 to-primary/80',
   },
 ]
 
@@ -45,10 +45,10 @@ export default function Portfolio() {
         transition={{ duration: 0.6, ease: 'easeInOut' }}
         className="mb-16 text-center"
       >
-        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-primary-purple">
+        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-primary">
           Portfolio
         </span>
-        <h2 className="mb-6 text-[28px] font-bold sm:text-[32px] lg:text-[40px]">
+        <h2 className="mb-6 text-2xl font-bold sm:text-[32px] lg:text-[40px]">
           Featured <span className="text-gradient">Projects</span>
         </h2>
         <p className="mx-auto max-w-2xl text-base leading-[160%] text-text-secondary sm:text-lg">

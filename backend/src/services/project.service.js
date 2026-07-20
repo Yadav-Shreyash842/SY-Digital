@@ -22,6 +22,7 @@ const PROJECT_SELECT = [
     "liveUrl",
     "completionDate",
     "isFeatured",
+    "revenue",
     "status",
     "createdBy",
     "createdAt",
@@ -290,6 +291,7 @@ const updateProject = async (projectId, updateData) => {
         "liveUrl",
         "completionDate",
         "isFeatured",
+        "revenue",
         "status",
         "slug",
     ];
@@ -344,6 +346,86 @@ const getFeaturedProjects = async () => {
 };
 
 
+const MAX_BULK_LIMIT = 50;
+
+const bulkDeleteProjects = async (ids) => {
+    if (!Array.isArray(ids) || ids.length === 0) {
+        throw new ApiError(400, "Please provide project IDs to delete");
+    }
+
+    if (ids.length > MAX_BULK_LIMIT) {
+        throw new ApiError(400, `Cannot delete more than ${MAX_BULK_LIMIT} projects at once`);
+    }
+
+    ids.forEach((id) => {
+        if (!mongoose.isValidObjectId(id)) {
+            throw new ApiError(400, `Invalid project ID: ${id}`);
+        }
+    });
+
+    const result = await Project.deleteMany({ _id: { $in: ids } });
+
+    return { deletedCount: result.deletedCount };
+};
+
+const bulkUpdateStatus = async (ids, status) => {
+    if (!Array.isArray(ids) || ids.length === 0) {
+        throw new ApiError(400, "Please provide project IDs to update");
+    }
+
+    if (ids.length > MAX_BULK_LIMIT) {
+        throw new ApiError(400, `Cannot update more than ${MAX_BULK_LIMIT} projects at once`);
+    }
+
+    const validStatuses = ["draft", "published", "archived"];
+
+    if (!validStatuses.includes(status)) {
+        throw new ApiError(400, `Invalid status. Must be one of: ${validStatuses.join(", ")}`);
+    }
+
+    ids.forEach((id) => {
+        if (!mongoose.isValidObjectId(id)) {
+            throw new ApiError(400, `Invalid project ID: ${id}`);
+        }
+    });
+
+    const result = await Project.updateMany(
+        { _id: { $in: ids } },
+        { $set: { status } }
+    );
+
+    return { updatedCount: result.modifiedCount, status };
+};
+
+const getProjectStats = async () => {
+    const [
+        totalProjects,
+        publishedProjects,
+        draftProjects,
+        archivedProjects,
+        featuredProjects,
+        revenueResult,
+    ] = await Promise.all([
+        Project.countDocuments(),
+        Project.countDocuments({ status: "published" }),
+        Project.countDocuments({ status: "draft" }),
+        Project.countDocuments({ status: "archived" }),
+        Project.countDocuments({ isFeatured: true }),
+        Project.aggregate([
+            { $group: { _id: null, total: { $sum: "$revenue" } } },
+        ]),
+    ]);
+
+    return {
+        totalProjects,
+        publishedProjects,
+        draftProjects,
+        archivedProjects,
+        featuredProjects,
+        totalRevenue: revenueResult[0]?.total || 0,
+    };
+};
+
 module.exports = {
     createProject,
     getAllProjects,
@@ -351,4 +433,7 @@ module.exports = {
     getProjectBySlug,
     updateProject,
     deleteProject,
+    bulkDeleteProjects,
+    bulkUpdateStatus,
+    getProjectStats,
 };

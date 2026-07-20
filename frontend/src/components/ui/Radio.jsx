@@ -8,7 +8,7 @@ export default function Radio({ label, className = '', theme = 'dark', id, ...pr
       <input
         id={inputId}
         type="radio"
-        className="h-5 w-5 border-white/20 bg-white/5 text-primary-purple focus:ring-2 focus:ring-primary-purple/30 focus:ring-offset-0"
+        className="h-5 w-5 border-white/20 bg-white/5 text-primary focus:ring-2 focus:ring-primary/30 focus:ring-offset-0"
         {...props}
       />
       {label && (

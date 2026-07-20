@@ -9,11 +9,19 @@ const {
     register,
     login,
     getProfile,
+    forgotPassword,
+    resetPassword,
+    updateProfile,
+    changePassword,
 } = require("../controllers/auth.controller");
 
 const {
     registerValidator,
     loginValidator,
+    forgotPasswordValidator,
+    resetPasswordValidator,
+    updateProfileValidator,
+    changePasswordValidator,
 } = require("../validators/auth.validator");
 
 const validate = require("../middlewares/validate");
@@ -39,6 +47,40 @@ router.get(
     "/profile",
     auth,
     getProfile
+);
+
+// Update profile
+router.patch(
+    "/profile",
+    auth,
+    updateProfileValidator,
+    validate,
+    updateProfile
+);
+
+// Change password
+router.patch(
+    "/change-password",
+    auth,
+    changePasswordValidator,
+    validate,
+    changePassword
+);
+
+// Forgot password
+router.post(
+    "/forgot-password",
+    forgotPasswordValidator,
+    validate,
+    forgotPassword
+);
+
+// Reset password
+router.post(
+    "/reset-password",
+    resetPasswordValidator,
+    validate,
+    resetPassword
 );
 
 //admin

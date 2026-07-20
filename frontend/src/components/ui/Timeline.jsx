@@ -8,11 +8,11 @@ export default function Timeline({ items = [], theme = 'dark', className = '' })
           {i < items.length - 1 && (
             <div className={cn('absolute left-[19px] top-10 h-[calc(100%-24px)] w-px', theme === 'dark' ? 'bg-white/10' : 'bg-gray-200')} />
           )}
-          <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-purple/20">
+          <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15">
             {item.icon ? (
-              <item.icon strokeWidth={1.75} className="h-5 w-5 text-primary-purple" />
+              <item.icon strokeWidth={1.75} className="h-5 w-5 text-primary" />
             ) : (
-              <span className="text-xs font-bold text-primary-purple">{i + 1}</span>
+              <span className="text-xs font-bold text-primary">{i + 1}</span>
             )}
           </div>
           <div className="pt-1">

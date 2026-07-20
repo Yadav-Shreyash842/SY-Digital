@@ -1,4 +1,4 @@
-const { createProject, getAllProjects , getProjectBySlug, updateProject , deleteProject, getFeaturedProjects } = require("../services/project.service");
+const { createProject, getAllProjects , getProjectBySlug, updateProject , deleteProject, getFeaturedProjects, bulkDeleteProjects, bulkUpdateStatus, getProjectStats } = require("../services/project.service");
 const ApiResponse = require("../utils/ApiResponse");
 
 const create = async (req, res, next) => {
@@ -174,6 +174,64 @@ const getFeatured = async (req, res, next) => {
 
 };
 
+const bulkDelete = async (req, res, next) => {
+
+    try {
+
+        const result = await bulkDeleteProjects(req.body.ids);
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                `${result.deletedCount} project(s) deleted successfully`,
+                result
+            )
+        );
+
+    } catch (error) {
+
+        next(error);
+
+    }
+
+};
+
+const bulkUpdate = async (req, res, next) => {
+
+    try {
+
+        const result = await bulkUpdateStatus(
+            req.body.ids,
+            req.body.status
+        );
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                `${result.updatedCount} project(s) updated to ${result.status} successfully`,
+                result
+            )
+        );
+
+    } catch (error) {
+
+        next(error);
+
+    }
+
+};
+
+const getStats = async (req, res, next) => {
+    try {
+        const stats = await getProjectStats();
+        return res.status(200).json(
+            new ApiResponse(200, "Project stats fetched successfully", stats)
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     create,
     getAll,
@@ -181,5 +239,8 @@ module.exports = {
     update,
     remove,
     getFeatured,
+    bulkDelete,
+    bulkUpdate,
+    getStats,
 };
 

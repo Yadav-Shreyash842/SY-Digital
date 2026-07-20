@@ -4,10 +4,10 @@ import { cn } from '../../utils/cn'
 
 export default function PageHero({ title, subtitle, breadcrumbs = [], children, className = '' }) {
   return (
-    <section className={cn('relative overflow-hidden border-b border-white/8 pt-28 pb-16 md:pt-32 md:pb-20', className)}>
-      <div className="absolute inset-0 hero-gradient opacity-80" />
+    <section className={cn('relative overflow-hidden border-b border-border pt-28 pb-16 md:pt-32 md:pb-20', className)}>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-accent-blue/5 to-transparent opacity-80" />
       <div className="absolute inset-0 grid-pattern opacity-30" />
-      <div className="absolute top-1/3 left-1/4 h-64 w-64 rounded-full bg-primary-purple/15 blur-[100px]" />
+      <div className="absolute top-1/3 left-1/4 h-64 w-64 rounded-full bg-primary/15 blur-[100px]" />
 
       <div className="relative mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-[1200px]">

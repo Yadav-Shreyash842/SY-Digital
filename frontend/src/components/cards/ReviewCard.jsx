@@ -12,7 +12,7 @@ export default function ReviewCard({ name, role, content, rating = 5, index = 0,
       transition={{ duration: 0.6, delay: index * 0.1, ease: 'easeInOut' }}
       className={cn('glass-card rounded-[24px] p-8', className)}
     >
-      <Quote strokeWidth={1.75} className="mb-4 h-8 w-8 text-primary-purple/50" />
+      <Quote strokeWidth={1.75} className="mb-4 h-8 w-8 text-primary/50" />
       <p className="mb-6 text-base leading-[160%] text-text-secondary">{content}</p>
       <div className="mb-4 flex gap-1">
         {Array.from({ length: rating }).map((_, j) => (

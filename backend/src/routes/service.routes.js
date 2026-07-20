@@ -15,6 +15,7 @@ const {
     update,
     remove,
     getFeatured,
+    getStats,
 } = require("../controllers/service.controller");
 
 const {
@@ -38,6 +39,13 @@ router.get(
 router.get(
     "/featured",
     getFeatured
+);
+
+router.get(
+    "/stats",
+    auth,
+    authorize(ROLES.ADMIN),
+    getStats
 );
 
 router.get(

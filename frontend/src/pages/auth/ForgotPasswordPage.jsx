@@ -5,18 +5,24 @@ import toast from 'react-hot-toast'
 import Input from '../../components/ui/Input'
 import Button from '../../components/ui/Button'
 import Alert from '../../components/ui/Alert'
+import authService from '../../services/auth.service'
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm()
 
-  const onSubmit = async () => {
+  const onSubmit = async (data) => {
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 1000))
-    setLoading(false)
-    setSent(true)
-    toast.success('Reset link sent!')
+    try {
+      await authService.forgotPassword(data.email)
+      setSent(true)
+      toast.success('Reset link sent!')
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to send reset link')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -36,7 +42,7 @@ export default function ForgotPasswordPage() {
       )}
 
       <p className="mt-8 text-center text-sm text-text-secondary">
-        <Link to="/login" className="font-semibold text-primary-purple hover:text-secondary-purple">Back to sign in</Link>
+        <Link to="/login" className="font-semibold text-primary hover:text-primary">Back to sign in</Link>
       </p>
     </div>
   )

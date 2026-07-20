@@ -49,9 +49,7 @@ const replyMessageValidator = [
     body("adminReply")
         .trim()
         .notEmpty()
-        .withMessage("Reply is required")
-        .isLength({ min: 5 })
-        .withMessage("Reply must be at least 5 characters long"),
+        .withMessage("Reply is required"),
 
 ];
 

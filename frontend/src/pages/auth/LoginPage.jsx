@@ -86,7 +86,7 @@ export default function LoginPage() {
 
           <Link
             to="/forgot-password"
-            className="text-sm text-primary-purple hover:text-secondary-purple"
+            className="text-sm text-primary hover:text-primary"
           >
             Forgot password?
           </Link>
@@ -106,7 +106,7 @@ export default function LoginPage() {
         Don't have an account?{' '}
         <Link
           to="/register"
-          className="font-semibold text-primary-purple hover:text-secondary-purple"
+          className="font-semibold text-primary hover:text-primary"
         >
           Create account
         </Link>

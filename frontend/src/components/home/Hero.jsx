@@ -28,7 +28,7 @@ export default function Hero() {
       <div className="absolute inset-0 hero-gradient" />
       <div className="absolute inset-0 grid-pattern opacity-40" />
 
-      <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-primary-purple/20 blur-[120px]" />
+      <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-primary/20 blur-[120px]" />
       <div className="absolute bottom-1/4 right-1/4 h-80 w-80 rounded-full bg-accent-blue/15 blur-[100px]" />
       <div className="absolute top-1/2 right-1/3 h-64 w-64 rounded-full bg-accent-cyan/10 blur-[80px]" />
 
@@ -49,7 +49,7 @@ export default function Hero() {
 
             <h1 className="text-[36px] font-extrabold leading-[1.1] tracking-tight sm:text-[48px] lg:text-[64px]">
               We Build{' '}
-              <span className="bg-gradient-to-r from-primary-purple via-secondary-purple to-accent-cyan bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary via-primary to-accent-cyan bg-clip-text text-transparent">
                 Digital Excellence
               </span>{' '}
               That Drives Growth
@@ -97,7 +97,7 @@ export default function Hero() {
                 animate={{ y: [0, -12, 0] }}
                 transition={{ duration: 4, delay, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <Icon strokeWidth={1.75} className="h-6 w-6 text-primary-purple" />
+                <Icon strokeWidth={1.75} className="h-6 w-6 text-primary" />
               </motion.div>
             ))}
 
@@ -107,8 +107,8 @@ export default function Hero() {
                   <p className="text-sm text-text-muted">Dashboard Overview</p>
                   <p className="text-xl font-bold">Revenue Analytics</p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-purple/20">
-                  <BarChart3 strokeWidth={1.75} className="h-5 w-5 text-primary-purple" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
+                  <BarChart3 strokeWidth={1.75} className="h-5 w-5 text-primary" />
                 </div>
               </div>
 
@@ -136,7 +136,7 @@ export default function Hero() {
                   {[40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 88].map((h, i) => (
                     <motion.div
                       key={i}
-                      className="flex-1 rounded-t-md bg-gradient-to-t from-primary-purple to-secondary-purple"
+                      className="flex-1 rounded-t-md bg-gradient-to-t from-primary to-primary"
                       initial={{ height: 0 }}
                       animate={{ height: `${h}%` }}
                       transition={{ duration: 0.6, delay: 0.5 + i * 0.05, ease: 'easeInOut' }}

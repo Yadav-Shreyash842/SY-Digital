@@ -43,14 +43,14 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', c
             aria-modal="true"
             aria-labelledby={title ? 'modal-title' : undefined}
             className={cn(
-             'relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-[24px] border border-white/10 bg-card-bg shadow-[0_24px_80px_rgba(0,0,0,0.5)]',
+             'relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-modal border border-border bg-card-bg shadow-xl',
               sizes[size],
               className,
             )}
           >
             {(title || onClose) && (
-              <div className="flex items-center justify-between border-b border-white/10 p-6">
-                {title && <h2 id="modal-title" className="text-xl font-bold">{title}</h2>}
+              <div className="flex items-center justify-between border-b border-white/10 p-4 sm:p-6">
+                {title && <h2 id="modal-title" className="text-lg font-bold sm:text-xl">{title}</h2>}
                 {onClose && (
                   <button
                     type="button"
@@ -63,7 +63,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', c
                 )}
               </div>
             )}
-           <div className="flex-1 overflow-y-auto p-6">
+           <div className="flex-1 overflow-y-auto p-4 sm:p-6">
   {children}
 </div>
           </motion.div>

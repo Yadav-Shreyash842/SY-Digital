@@ -7,17 +7,17 @@ export default function Breadcrumb({ items = [], theme = 'dark', className = '' 
     <nav aria-label="Breadcrumb" className={cn('flex items-center gap-2 text-sm', className)}>
       <Link
         to="/"
-        className={cn('flex items-center gap-1 transition-colors hover:text-primary-purple', theme === 'dark' ? 'text-text-muted' : 'text-gray-500')}
+        className={cn('flex items-center gap-1 transition-colors hover:text-primary', theme === 'dark' ? 'text-text-muted' : 'text-gray-500')}
       >
         <Home strokeWidth={1.75} className="h-4 w-4" />
       </Link>
-      {items.map((item, i) => (
+      {items.map((item) => (
         <span key={item.label} className="flex items-center gap-2">
           <ChevronRight strokeWidth={1.75} className={cn('h-4 w-4', theme === 'dark' ? 'text-text-muted' : 'text-gray-400')} />
           {item.href ? (
             <Link
               to={item.href}
-              className={cn('transition-colors hover:text-primary-purple', theme === 'dark' ? 'text-text-secondary' : 'text-gray-600')}
+              className={cn('transition-colors hover:text-primary', theme === 'dark' ? 'text-text-secondary' : 'text-gray-600')}
             >
               {item.label}
             </Link>

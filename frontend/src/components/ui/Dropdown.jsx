@@ -25,7 +25,7 @@ export default function Dropdown({ trigger, items = [], isOpen, onClose, align =
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
             className={cn(
-              'absolute z-50 mt-2 min-w-[200px] overflow-hidden rounded-2xl border border-white/10 bg-card-bg shadow-[0_12px_40px_rgba(0,0,0,0.4)] backdrop-blur-xl',
+              'absolute z-50 mt-2 min-w-[200px] overflow-hidden rounded-dropdown border border-border bg-dropdown-bg shadow-lg backdrop-blur-xl',
               align === 'right' ? 'right-0' : 'left-0',
             )}
             role="menu"

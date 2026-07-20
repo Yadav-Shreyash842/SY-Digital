@@ -26,7 +26,7 @@ export default function Navbar() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 h-20 transition-all duration-300 ${
-          scrolled ? 'glass-nav shadow-[0_4px_24px_rgba(0,0,0,0.2)]' : 'bg-transparent'
+          scrolled ? 'bg-white/[0.03] border-b border-white/[0.05] backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.2)]' : 'bg-transparent'
         }`}
       >
         <div className="mx-auto flex h-full max-w-[1320px] items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -66,7 +66,7 @@ export default function Navbar() {
 
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 lg:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-btn border border-border bg-white/5 lg:hidden"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
           >
@@ -90,14 +90,14 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.4, ease: 'easeInOut' }}
-              className="fixed right-0 top-0 z-50 flex h-full w-[min(320px,85vw)] flex-col glass-card border-l border-white/10 p-6 lg:hidden"
+              className="fixed right-0 top-0 z-50 flex h-full w-[min(320px,85vw)] flex-col glass-card border-l border-border p-6 lg:hidden"
             >
               <div className="mb-8 flex items-center justify-between">
                 <Logo />
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10"
+                  className="flex h-10 w-10 items-center justify-center rounded-btn border border-border"
                   aria-label="Close menu"
                 >
                   <X strokeWidth={1.75} className="h-5 w-5" />

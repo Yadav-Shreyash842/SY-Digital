@@ -34,7 +34,7 @@ export default function Drawer({ isOpen, onClose, title, children, side = 'right
             exit={slideFrom}
             transition={{ duration: 0.4, ease: 'easeInOut' }}
             className={cn(
-              'fixed inset-y-0 z-50 flex w-[min(400px,90vw)] flex-col border-white/10 bg-secondary-bg shadow-2xl',
+              'fixed inset-y-0 z-50 flex w-[min(400px,90vw)] flex-col border-border bg-secondary-bg shadow-xl',
               side === 'right' ? 'right-0 border-l' : 'left-0 border-r',
               className,
             )}

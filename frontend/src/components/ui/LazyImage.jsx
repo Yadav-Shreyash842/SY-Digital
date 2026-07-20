@@ -7,7 +7,7 @@ export default function LazyImage({ src, alt, gradient, aspectRatio = '4/3', cla
   if (!src && gradient) {
     return (
       <div
-        className={cn('relative overflow-hidden rounded-2xl', className)}
+        className={cn('relative overflow-hidden rounded-card', className)}
         style={{ aspectRatio }}
       >
         <div className={cn('absolute inset-0 bg-gradient-to-br', gradient)} />
@@ -17,7 +17,7 @@ export default function LazyImage({ src, alt, gradient, aspectRatio = '4/3', cla
   }
 
   return (
-    <div className={cn('relative overflow-hidden rounded-2xl bg-white/5', className)} style={{ aspectRatio }}>
+    <div className={cn('relative overflow-hidden rounded-card bg-white/5', className)} style={{ aspectRatio }}>
       {!loaded && <div className="absolute inset-0 animate-pulse bg-white/10" />}
       <img
         src={src}

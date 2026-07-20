@@ -1,4 +1,4 @@
-const { createService , getAllServices , getServiceBySlug , updateService , deleteService , getFeaturedServices} = require("../services/service.service");
+const { createService , getAllServices , getServiceBySlug , updateService , deleteService , getFeaturedServices , getServiceStats} = require("../services/service.service");
 const ApiResponse = require("../utils/ApiResponse");
 
 const create = async (req, res, next) => {
@@ -175,6 +175,17 @@ const getFeatured = async (req, res, next) => {
 
 };
 
+const getStats = async (req, res, next) => {
+    try {
+        const stats = await getServiceStats();
+        return res.status(200).json(
+            new ApiResponse(200, "Service stats fetched successfully", stats)
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     create,
     getAll,
@@ -182,4 +193,5 @@ module.exports = {
     update,
     remove,
     getFeatured,
+    getStats,
 };

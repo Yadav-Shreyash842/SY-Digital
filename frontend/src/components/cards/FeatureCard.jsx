@@ -15,8 +15,8 @@ export default function FeatureCard({ icon: Icon, title, description, index = 0,
       )}
     >
       {Icon && (
-        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-purple/15">
-          <Icon strokeWidth={1.75} className="h-6 w-6 text-primary-purple" />
+        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/15">
+          <Icon strokeWidth={1.75} className="h-6 w-6 text-primary" />
         </div>
       )}
       <h3 className={cn('mb-2 text-lg font-bold', theme === 'dark' ? 'text-white' : 'text-gray-900')}>{title}</h3>

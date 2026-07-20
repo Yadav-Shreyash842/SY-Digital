@@ -14,10 +14,10 @@ const Input = forwardRef(function Input({
   const inputId = id || label?.toLowerCase().replace(/\s+/g, '-')
 
   const baseInput = cn(
-    'h-14 w-full rounded-2xl border px-4 text-base transition-all duration-300 focus:outline-none focus:ring-2',
+    'h-12 w-full rounded-input border px-4 text-base transition-all duration-300 focus:outline-none focus:ring-2',
     theme === 'dark'
-      ? 'border-white/10 bg-white/5 text-white placeholder:text-text-muted focus:border-primary-purple focus:ring-primary-purple/20'
-      : 'border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:border-primary-purple focus:ring-primary-purple/20',
+      ? 'border-border bg-white/5 text-white placeholder:text-text-placeholder focus:border-primary focus:ring-primary/20'
+      : 'border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-primary/20',
     error && 'border-danger focus:border-danger focus:ring-danger/20',
     inputClassName,
   )

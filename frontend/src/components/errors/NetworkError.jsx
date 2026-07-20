@@ -1,11 +1,9 @@
-import React from 'react'
-
 export default function NetworkError({ onRetry }) {
   return (
-    <div className="text-center py-8">
-      <p className="mb-4">Network error. Please check your connection.</p>
+    <div className="py-8 text-center">
+      <p className="mb-4 text-text-secondary">Network error. Please check your connection.</p>
       {onRetry && (
-        <button className="btn" onClick={onRetry}>
+        <button className="rounded-btn bg-primary px-6 py-2 text-sm font-medium text-white transition-all hover:brightness-110" onClick={onRetry}>
           Retry
         </button>
       )}

@@ -24,9 +24,9 @@ export default function BlogCard({ title, excerpt, category, date, slug, imageGr
               {date}
             </span>
           </div>
-          <h3 className="mb-2 text-lg font-bold transition-colors group-hover:text-primary-purple">{title}</h3>
+          <h3 className="mb-2 text-lg font-bold transition-colors group-hover:text-primary">{title}</h3>
           <p className="mb-4 line-clamp-2 text-sm leading-[160%] text-text-secondary">{excerpt}</p>
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary-purple transition-all group-hover:gap-2">
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-all group-hover:gap-2">
             Read more <ArrowUpRight strokeWidth={1.75} className="h-4 w-4" />
           </span>
         </div>

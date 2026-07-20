@@ -15,6 +15,8 @@ const {
     update,
     remove,
     getFeatured,
+    toggleFeaturedBlog,
+    getStats,
 } = require("../controllers/blog.controller");
 
 const {
@@ -36,8 +38,22 @@ router.get(
 );
 
 router.get(
+    "/stats",
+    auth,
+    authorize(ROLES.ADMIN),
+    getStats
+);
+
+router.get(
     "/featured",
     getFeatured
+);
+
+router.patch(
+    "/:id/featured",
+    auth,
+    authorize(ROLES.ADMIN),
+    toggleFeaturedBlog
 );
 
 router.get(

@@ -70,11 +70,18 @@ const messageSchema = new mongoose.Schema(
 
         },
 
-      adminReply: {
+       adminReply: {
     type: String,
     trim: true,
     default: "",
 },
+
+        clientReplies: [
+            {
+                text: { type: String, trim: true },
+                createdAt: { type: Date, default: Date.now },
+            },
+        ],
 
         repliedAt: {
 

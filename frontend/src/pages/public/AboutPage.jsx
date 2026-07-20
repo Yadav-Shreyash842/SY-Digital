@@ -31,7 +31,7 @@ export default function AboutPage() {
       <SectionContainer>
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-16">
           <div>
-            <h2 className="mb-6 text-[28px] font-bold lg:text-[40px]">Our Story</h2>
+            <h2 className="mb-6 text-2xl font-bold sm:text-[32px] lg:text-[40px]">Our Story</h2>
             <p className="mb-4 text-base leading-[160%] text-text-secondary">
               Founded on the belief that digital experiences should feel as premium as the brands they represent, SY Digital has grown into a trusted partner for ambitious companies worldwide.
             </p>
@@ -40,21 +40,21 @@ export default function AboutPage() {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <StatsCard icon={Award} label="Projects" value="250+" color="from-primary-purple to-secondary-purple" theme="dark" />
+            <StatsCard icon={Award} label="Projects" value="250+" color="from-primary to-primary" />
             <StatsCard icon={Users} label="Team Members" value="45+" color="from-accent-blue to-accent-cyan" theme="dark" index={1} />
-            <StatsCard icon={Rocket} label="Countries" value="40+" color="from-secondary-purple to-primary-purple" theme="dark" index={2} />
+            <StatsCard icon={Rocket} label="Countries" value="40+" color="from-primary to-primary" index={2} />
             <StatsCard icon={Target} label="Satisfaction" value="98%" color="from-accent-cyan to-accent-blue" theme="dark" index={3} />
           </div>
         </div>
       </SectionContainer>
       <SectionContainer className="bg-section-bg/30 pt-0">
-        <h2 className="mb-12 text-center text-[28px] font-bold lg:text-[40px]">Our Values</h2>
+        <h2 className="mb-12 text-center text-2xl font-bold sm:text-[32px] lg:text-[40px]">Our Values</h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {values.map((v, i) => <FeatureCard key={v.title} {...v} index={i} />)}
         </div>
       </SectionContainer>
       <SectionContainer className="pt-0">
-        <h2 className="mb-12 text-[28px] font-bold lg:text-[40px]">Our Journey</h2>
+        <h2 className="mb-12 text-2xl font-bold sm:text-[32px] lg:text-[40px]">Our Journey</h2>
         <Timeline items={timeline} />
       </SectionContainer>
       <CTA />
