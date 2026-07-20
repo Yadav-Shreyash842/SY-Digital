@@ -47,16 +47,12 @@ const registerUser = async (userData) => {
         password: hashedPassword,
     });
 
-    // Send welcome email (don't fail registration if email fails)
-    try {
-        await sendEmail({
-            to: user.email,
-            subject: "Welcome to SY Digital",
-            html: welcomeEmail(`${user.firstName} ${user.lastName}`),
-        });
-    } catch (error) {
-        logger.error(`Welcome email failed: ${error.message}`);
-    }
+    // Send welcome email (fire-and-forget — don't block registration)
+    sendEmail({
+        to: user.email,
+        subject: "Welcome to SY Digital",
+        html: welcomeEmail(`${user.firstName} ${user.lastName}`),
+    }).catch((error) => logger.error(`Welcome email failed: ${error.message}`));
 
     return user.toJSON();
 };
