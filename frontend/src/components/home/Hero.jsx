@@ -22,7 +22,7 @@ const stats = [
   { value: '15+', label: 'Years Experience' },
 ]
 
-export default function Hero() {
+export default function Hero({ onOpenProjectForm }) {
   return (
     <section className="relative flex min-h-screen items-center overflow-hidden pt-20">
       <div className="absolute inset-0 hero-gradient" />
@@ -61,7 +61,7 @@ export default function Hero() {
             </p>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <Button variant="primary">
+              <Button variant="primary" onClick={onOpenProjectForm}>
                 Start Your Project
                 <ArrowUpRight strokeWidth={1.75} className="h-5 w-5" />
               </Button>

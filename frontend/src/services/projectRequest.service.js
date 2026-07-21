@@ -1,6 +1,10 @@
 import { apiClient } from './apiClient'
 
 export const projectRequestService = {
+  createPublic: async (data) => {
+    const res = await apiClient.post('/api/project-requests/public', data)
+    return res?.data
+  },
   list: async (params = {}) => {
     const res = await apiClient.get('/api/project-requests', { params })
     return res?.data

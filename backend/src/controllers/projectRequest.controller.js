@@ -183,8 +183,49 @@ const updateStatus = async (req, res, next) => {
     }
 };
 
+const createPublic = async (req, res, next) => {
+    try {
+        const { name, email, phone, company, projectType, budget, timeline, description } = req.body;
+
+        if (!name || !email || !projectType || !description) {
+            throw new ApiError(400, "Name, email, project type, and description are required");
+        }
+
+        const projectRequest = await ProjectRequest.create({
+            clientName: name.trim(),
+            clientEmail: email.trim().toLowerCase(),
+            title: projectType,
+            description: [
+                phone ? `Phone: ${phone}` : "",
+                company ? `Company: ${company}` : "",
+                `Budget: ${budget || "Not specified"}`,
+                `Timeline: ${timeline || "Not specified"}`,
+                "",
+                description,
+            ].filter(Boolean).join("\n"),
+            category: projectType,
+            budget: 0,
+            timeline: timeline || "",
+        });
+
+        try {
+            const { emitToAdmins } = require("../socket/socketEmitter");
+            emitToAdmins("newProjectRequest", { request: projectRequest });
+        } catch (err) {
+            logger.warn(`[Socket.IO] ${err.message}`);
+        }
+
+        return res.status(201).json(
+            new ApiResponse(201, "Project request submitted successfully", projectRequest)
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     create,
+    createPublic,
     getAll,
     getById,
     updateStatus,
