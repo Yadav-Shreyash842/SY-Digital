@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { Code2, Palette, Megaphone, ArrowUpRight } from 'lucide-react'
 import SectionContainer from '../ui/SectionContainer'
 
@@ -6,18 +7,21 @@ const services = [
   {
     icon: Code2,
     title: 'Web Development',
+    slug: 'web-development',
     description: 'Scalable, performant web applications built with cutting-edge technologies and best practices.',
     tags: ['React', 'Node.js', 'Next.js'],
   },
   {
     icon: Palette,
     title: 'UI/UX Design',
+    slug: 'ui-ux-design',
     description: 'Beautiful, intuitive interfaces that delight users and drive conversions across every touchpoint.',
     tags: ['Figma', 'Prototyping', 'Design Systems'],
   },
   {
     icon: Megaphone,
     title: 'Digital Marketing',
+    slug: 'digital-marketing',
     description: 'Data-driven strategies that amplify your brand and accelerate growth across all channels.',
     tags: ['SEO', 'Analytics', 'Campaigns'],
   },
@@ -70,13 +74,13 @@ export default function Services() {
                 </span>
               ))}
             </div>
-            <a
-              href="#"
+            <Link
+              to={`/services/${service.slug}`}
               className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-all group-hover:gap-2"
             >
               Learn more
               <ArrowUpRight strokeWidth={1.75} className="h-4 w-4" />
-            </a>
+            </Link>
           </motion.div>
         ))}
       </div>
