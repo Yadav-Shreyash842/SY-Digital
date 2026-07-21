@@ -50,6 +50,7 @@ if (process.env.NODE_ENV !== "production") {
     allowedOrigins.push("http://localhost:5173", "http://localhost:3000");
 }
 
+
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
