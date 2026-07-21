@@ -34,13 +34,13 @@ export default function CTA() {
                 Schedule a Call
               </Button>
             </Link>
-            <button
-              type="button"
+            <Link
+              to="/portfolio"
               className="inline-flex h-[52px] items-center justify-center gap-2 rounded-full px-8 text-base font-semibold text-white transition-all duration-300 hover:gap-3"
             >
               View Case Studies
               <ArrowUpRight strokeWidth={1.75} className="h-5 w-5" />
-            </button>
+            </Link>
           </div>
         </div>
       </motion.div>

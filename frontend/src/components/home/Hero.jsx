@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import {
   ArrowUpRight,
   TrendingUp,
@@ -65,7 +66,9 @@ export default function Hero({ onOpenProjectForm }) {
                 Start Your Project
                 <ArrowUpRight strokeWidth={1.75} className="h-5 w-5" />
               </Button>
-              <Button variant="secondary">View Our Work</Button>
+              <Link to="/portfolio">
+                <Button variant="secondary">View Our Work</Button>
+              </Link>
             </div>
 
             <div className="flex flex-wrap gap-8 pt-4">
