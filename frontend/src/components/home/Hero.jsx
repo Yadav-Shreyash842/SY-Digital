@@ -62,12 +62,12 @@ export default function Hero({ onOpenProjectForm }) {
             </p>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <Button variant="primary" onClick={onOpenProjectForm}>
+              <Button variant="primary" onClick={onOpenProjectForm} className="w-full sm:w-auto">
                 Start Your Project
                 <ArrowUpRight strokeWidth={1.75} className="h-5 w-5" />
               </Button>
               <Link to="/portfolio">
-                <Button variant="secondary">View Our Work</Button>
+                <Button variant="secondary" className="w-full sm:w-auto">View Our Work</Button>
               </Link>
             </div>
 
