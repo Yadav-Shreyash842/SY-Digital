@@ -37,7 +37,7 @@ export default function Services() {
         transition={{ duration: 0.6, ease: 'easeInOut' }}
         className="mb-16 text-center"
       >
-        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-primary">
+        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-accent-purple">
           Our Services
         </span>
         <h2 className="mb-6 text-2xl font-bold sm:text-[32px] lg:text-[40px]">
@@ -57,10 +57,10 @@ export default function Services() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeInOut' }}
-            className="group premium-card p-8"
+            className="group bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-[24px] p-8 transition-all duration-400 hover:border-accent-purple/40 hover:shadow-[0_0_40px_rgba(139,92,246,0.15)] hover:scale-[1.02]"
           >
-            <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/20 transition-all duration-400 group-hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]">
-              <service.icon strokeWidth={1.75} className="h-7 w-7 text-primary" />
+            <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-purple/20 to-accent-orange/20 transition-all duration-400 group-hover:shadow-[0_0_30px_rgba(139,92,246,0.3)]">
+              <service.icon strokeWidth={1.75} className="h-7 w-7 text-accent-purple" />
             </div>
             <h3 className="mb-3 text-xl font-bold">{service.title}</h3>
             <p className="mb-6 text-base leading-[160%] text-text-secondary">{service.description}</p>
@@ -68,7 +68,7 @@ export default function Services() {
               {service.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-text-secondary"
+                  className="rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm px-3 py-1 text-xs font-medium text-text-secondary"
                 >
                   {tag}
                 </span>
@@ -76,10 +76,15 @@ export default function Services() {
             </div>
             <Link
               to={`/services/${service.slug}`}
-              className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-all group-hover:gap-2"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-accent-purple transition-all duration-300 group-hover:gap-3"
             >
               Learn more
-              <ArrowUpRight strokeWidth={1.75} className="h-4 w-4" />
+              <motion.span
+                animate={{ x: [0, 4, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <ArrowUpRight strokeWidth={1.75} className="h-4 w-4" />
+              </motion.span>
             </Link>
           </motion.div>
         ))}

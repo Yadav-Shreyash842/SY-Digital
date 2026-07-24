@@ -11,14 +11,14 @@ const sizeClasses = {
 }
 
 const variants = {
-  primary: 'bg-primary text-white hover:bg-primary-hover active:bg-primary-active shadow-[0_4px_20px_rgba(239,68,68,0.3)]',
-  secondary: 'border border-border bg-white/[0.03] text-white hover:bg-white/[0.06]',
+  primary: 'bg-gradient-to-r from-accent-purple to-accent-orange text-white shadow-[0_4px_24px_rgba(139,92,246,0.3)] hover:shadow-[0_8px_32px_rgba(139,92,246,0.45)]',
+  secondary: 'border border-white/20 bg-white/[0.04] text-white hover:bg-white/[0.08] backdrop-blur-xl',
   ghost: 'text-text-secondary hover:text-white',
-  outline: 'border border-border bg-transparent text-white hover:bg-white/5',
+  outline: 'border border-white/20 bg-transparent text-white hover:bg-white/5 backdrop-blur-xl',
   danger: 'bg-danger text-white hover:opacity-90',
-  nav: 'bg-primary text-white hover:bg-primary-hover active:bg-primary-active shadow-[0_4px_20px_rgba(239,68,68,0.3)]',
-  light: 'bg-primary text-white hover:bg-primary-hover active:bg-primary-active shadow-[0_4px_20px_rgba(239,68,68,0.3)]',
-  lightOutline: 'border border-gray-200 bg-white text-gray-900 hover:bg-gray-50',
+  nav: 'bg-gradient-to-r from-accent-purple to-accent-orange text-white shadow-[0_4px_24px_rgba(139,92,246,0.3)] hover:shadow-[0_8px_32px_rgba(139,92,246,0.45)]',
+  light: 'bg-gradient-to-r from-accent-purple to-accent-orange text-white shadow-[0_4px_24px_rgba(139,92,246,0.3)] hover:shadow-[0_8px_32px_rgba(139,92,246,0.45)]',
+  lightOutline: 'border border-white/20 bg-white/[0.04] text-white hover:bg-white/[0.08] backdrop-blur-xl',
 }
 
 export default function Button({
@@ -36,7 +36,7 @@ export default function Button({
   const classes = cn(
     variants[variant] || variants.primary,
     sizeClasses[size] || sizeClasses.md,
-    'inline-flex items-center justify-center font-semibold rounded-btn transition-all duration-300',
+    'inline-flex items-center justify-center font-semibold rounded-[16px] transition-all duration-300',
     isDisabled && 'pointer-events-none opacity-60',
     className,
   )
@@ -48,13 +48,21 @@ export default function Button({
     </>
   )
 
+  const handleClick = (e) => {
+    if (isDisabled) return
+    if (as !== 'a' && !href) return
+  }
+
   if (as === 'a' || href) {
     return (
       <motion.a
         href={href}
         className={classes}
+        whileHover={isDisabled ? undefined : { scale: 1.03 }}
         whileTap={isDisabled ? undefined : { scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         aria-disabled={isDisabled}
+        onClick={handleClick}
         {...props}
       >
         {content}
@@ -67,7 +75,10 @@ export default function Button({
       type="button"
       className={classes}
       disabled={isDisabled}
+      whileHover={isDisabled ? undefined : { scale: 1.03 }}
       whileTap={isDisabled ? undefined : { scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+      onClick={handleClick}
       {...props}
     >
       {content}

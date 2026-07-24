@@ -40,7 +40,7 @@ export default function Pricing() {
         transition={{ duration: 0.6, ease: 'easeInOut' }}
         className="mb-16 text-center"
       >
-        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-primary">
+        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-accent-purple">
           Pricing
         </span>
         <h2 className="mb-6 text-2xl font-bold sm:text-[32px] lg:text-[40px]">
@@ -59,14 +59,14 @@ export default function Pricing() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeInOut' }}
-            className={`relative rounded-[28px] border p-8 transition-all duration-400 ${
+            className={`relative rounded-[24px] border p-8 transition-all duration-400 ${
               plan.highlighted
-                ? 'border-primary/50 bg-gradient-to-b from-primary/10 to-card-bg shadow-[0_0_60px_rgba(239,68,68,0.2)] scale-[1.02] lg:scale-105'
-                : 'border-white/8 bg-card-bg premium-card'
+                ? 'border-accent-purple/50 bg-gradient-to-b from-accent-purple/[0.08] to-white/[0.02] backdrop-blur-xl shadow-[0_0_60px_rgba(139,92,246,0.25)] scale-[1.02] lg:scale-105'
+                : 'border-white/[0.06] bg-white/[0.02] backdrop-blur-xl hover:border-accent-purple/30 hover:shadow-[0_0_30px_rgba(139,92,246,0.1)] hover:scale-[1.02]'
             }`}
           >
             {plan.highlighted && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary to-primary px-4 py-1 text-xs font-semibold">
+              <span className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-accent-purple to-accent-orange px-5 py-1.5 text-xs font-semibold shadow-[0_4px_16px_rgba(139,92,246,0.3)]">
                 Most Popular
               </span>
             )}

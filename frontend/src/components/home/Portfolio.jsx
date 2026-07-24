@@ -45,7 +45,7 @@ export default function Portfolio() {
         transition={{ duration: 0.6, ease: 'easeInOut' }}
         className="mb-16 text-center"
       >
-        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-primary">
+        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-accent-purple">
           Portfolio
         </span>
         <h2 className="mb-6 text-2xl font-bold sm:text-[32px] lg:text-[40px]">
@@ -65,7 +65,7 @@ export default function Portfolio() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: i * 0.08, ease: 'easeInOut' }}
-            className="group relative overflow-hidden rounded-[24px] border border-white/8"
+            className="group relative overflow-hidden rounded-[24px] border border-white/[0.06] bg-white/[0.02] transition-all duration-400 hover:border-accent-purple/30 hover:shadow-[0_0_30px_rgba(139,92,246,0.1)]"
           >
             <div className={`aspect-[4/3] bg-gradient-to-br ${project.gradient} transition-transform duration-600 ease-in-out group-hover:scale-110`}>
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.15),transparent_60%)]" />

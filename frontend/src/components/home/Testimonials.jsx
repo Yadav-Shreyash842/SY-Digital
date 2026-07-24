@@ -33,7 +33,7 @@ export default function Testimonials() {
         transition={{ duration: 0.6, ease: 'easeInOut' }}
         className="mb-16 text-center"
       >
-        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-primary">
+        <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-accent-purple">
           Testimonials
         </span>
         <h2 className="mb-6 text-2xl font-bold sm:text-[32px] lg:text-[40px]">
@@ -49,9 +49,9 @@ export default function Testimonials() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeInOut' }}
-            className="glass-card rounded-[24px] p-8"
+            className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-[24px] p-8 transition-all duration-400 hover:border-accent-purple/30 hover:shadow-[0_0_30px_rgba(139,92,246,0.1)]"
           >
-            <Quote strokeWidth={1.75} className="mb-4 h-8 w-8 text-primary/50" />
+            <Quote strokeWidth={1.75} className="mb-4 h-8 w-8 text-accent-purple/50" />
             <p className="mb-6 text-base leading-[160%] text-text-secondary">{item.content}</p>
             <div className="mb-4 flex gap-1">
               {Array.from({ length: item.rating }).map((_, j) => (
