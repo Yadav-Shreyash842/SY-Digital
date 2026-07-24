@@ -22,6 +22,7 @@ const notificationRoutes = require("./routes/notification.routes");
 const userRoutes = require("./routes/user.routes");
 const clientRoutes = require("./routes/client.routes");
 const projectRequestRoutes = require("./routes/projectRequest.routes");
+const aiRoutes = require("./routes/ai.routes");
 const ApiError = require("./utils/ApiError");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./docs/swagger");
@@ -106,6 +107,7 @@ app.use("/api/users", adminLimiter, userRoutes);
 app.use("/api/project-requests", adminLimiter, projectRequestRoutes);
 app.use("/api/reviews", adminLimiter, reviewRoutes);
 app.use("/api/client", clientRoutes);
+app.use("/api/ai", aiRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {
