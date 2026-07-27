@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink, Star } from 'lucide-react'
 
 function formatYear(dateStr) {
   if (!dateStr) return ''
@@ -33,9 +33,17 @@ export default function PortfolioCard({ project, index = 0 }) {
             <span className="text-4xl font-black text-white/20">SY</span>
           </div>
         )}
-        <span className="absolute right-4 top-4 rounded-full border border-white/10 bg-[rgba(15,17,23,0.85)] px-3.5 py-1.5 text-xs font-semibold text-primary backdrop-blur-md">
-          {project.category}
-        </span>
+        <div className="absolute right-4 top-4 flex items-center gap-2">
+          {project.isFeatured && (
+            <span className="flex items-center gap-1 rounded-full border border-accent-blue/30 bg-accent-blue/20 px-3 py-1 text-xs font-semibold text-accent-blue backdrop-blur-md">
+              <Star strokeWidth={2} className="h-3 w-3" />
+              Featured
+            </span>
+          )}
+          <span className="rounded-full border border-white/10 bg-[rgba(15,17,23,0.85)] px-3.5 py-1.5 text-xs font-semibold text-primary backdrop-blur-md">
+            {project.category}
+          </span>
+        </div>
       </div>
 
       {/* Body */}

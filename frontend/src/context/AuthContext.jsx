@@ -13,10 +13,27 @@ export function AuthProvider({ children }) {
     }
   })
 
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Placeholder: when integrating, sync profile from backend
+    const token = localStorage.getItem('sy_digital_token')
+    if (!token) {
+      setLoading(false)
+      return
+    }
+    authService.fetchProfile()
+      .then((userData) => {
+        if (userData) {
+          localStorage.setItem('sy_digital_user', JSON.stringify(userData))
+          setUser(userData)
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem('sy_digital_token')
+        localStorage.removeItem('sy_digital_user')
+        setUser(null)
+      })
+      .finally(() => setLoading(false))
   }, [])
 
 const login = async (email, password) => {

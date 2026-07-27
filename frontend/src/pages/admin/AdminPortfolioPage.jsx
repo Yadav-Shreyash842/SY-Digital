@@ -275,6 +275,7 @@ export default function AdminPortfolioPage() {
       </div>
 
       <ProjectFormModal
+        key={editData?._id || 'create'}
         isOpen={showCreate}
         onClose={() => { setShowCreate(false); setEditData(null) }}
         onSubmit={handleCreate}
@@ -282,6 +283,7 @@ export default function AdminPortfolioPage() {
       />
 
       <ProjectFormModal
+        key={editData?._id ? `edit-${editData._id}` : 'edit'}
         isOpen={showEdit}
         onClose={() => { setShowEdit(false); setEditData(null) }}
         onSubmit={handleEdit}

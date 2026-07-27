@@ -21,11 +21,17 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
-// Response interceptor (centralized error handling placeholder)
+// Response interceptor (centralized error handling)
 apiClient.interceptors.response.use(
   (res) => res,
   (err) => {
-    // Leave error handling to callers; this is a placeholder hook
+    if (err.response?.status === 401) {
+      localStorage.removeItem('sy_digital_token')
+      localStorage.removeItem('sy_digital_user')
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
+    }
     return Promise.reject(err)
   }
 )
