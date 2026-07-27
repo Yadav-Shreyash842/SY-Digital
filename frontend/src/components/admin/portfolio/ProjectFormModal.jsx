@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 import Modal from '../../ui/Modal'
 import Input from '../../ui/Input'
 import Textarea from '../../ui/Textarea'
@@ -115,31 +116,36 @@ export default function ProjectFormModal({
         const uploads = await Promise.all(
           imageFiles.map((file) => uploadService.uploadImage(file).then((r) => r?.data))
         )
-        uploadedImages = uploads.filter(Boolean)
+        uploadedImages = [...formData.images, ...uploads.filter(Boolean)]
       }
       const payload = buildPayload()
       payload.images = uploadedImages
       await onSubmit(payload)
       onClose()
     } catch (err) {
-      // error handled by parent
+      toast.error(err?.response?.data?.message || 'Something went wrong')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDrop = (files) => {
-    if (!files?.length) return
-    const newFiles = Array.from(files)
-    setImageFiles((prev) => [...prev, ...newFiles])
+  const handleDrop = (file) => {
+    if (!file) return
+    setImageFiles((prev) => [...prev, file])
     setImagePreviews((prev) => [
       ...prev,
-      ...newFiles.map((f) => URL.createObjectURL(f)),
+      URL.createObjectURL(file),
     ])
   }
 
   const removeImage = (idx) => {
-    setImageFiles((prev) => prev.filter((_, i) => i !== idx))
+    const existingCount = formData.images.length
+    if (idx < existingCount) {
+      const updated = formData.images.filter((_, i) => i !== idx)
+      setFormData({ ...formData, images: updated })
+    } else {
+      setImageFiles((prev) => prev.filter((_, i) => i !== idx - existingCount))
+    }
     setImagePreviews((prev) => prev.filter((_, i) => i !== idx))
   }
 
@@ -176,7 +182,7 @@ export default function ProjectFormModal({
 
         <div>
           <label className="mb-2 block text-sm font-medium text-text-secondary">Project Images</label>
-          <FileDropZone onDrop={handleDrop} accept={{ 'image/*': ['.jpeg', '.jpg', '.png', '.webp'] }} multiple />
+          <FileDropZone onFile={(file) => handleDrop(file)} accept={{ 'image/*': ['.jpeg', '.jpg', '.png', '.webp'] }} multiple />
           {imagePreviews.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-3">
               {imagePreviews.map((url, idx) => (

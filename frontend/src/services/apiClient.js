@@ -13,6 +13,9 @@ const apiClient = axios.create({
 
 // Request interceptor (attach token if present)
 apiClient.interceptors.request.use((config) => {
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type']
+  }
   const token = localStorage.getItem('sy_digital_token')
   if (token) {
     config.headers = config.headers || {}

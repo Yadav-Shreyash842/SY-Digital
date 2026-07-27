@@ -13,6 +13,7 @@ export default function FileDropZone({
   onRemove,
   error,
   hint,
+  multiple = false,
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef(null);
@@ -39,12 +40,14 @@ export default function FileDropZone({
       e.stopPropagation();
       setIsDragging(false);
 
-      const file = e.dataTransfer.files?.[0];
-      if (file) {
-        onFile?.(file);
+      const files = Array.from(e.dataTransfer.files || []);
+      if (multiple) {
+        files.forEach((f) => onFile?.(f));
+      } else if (files[0]) {
+        onFile?.(files[0]);
       }
     },
-    [onFile]
+    [onFile, multiple]
   );
 
   const handleClick = () => {
@@ -52,11 +55,9 @@ export default function FileDropZone({
   };
 
   const handleInputChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      onFile?.(file);
-    }
-    e.target.value = "";
+      const selectedFiles = multiple ? Array.from(e.target.files || []) : [e.target.files?.[0]].filter(Boolean);
+      selectedFiles.forEach((f) => onFile?.(f));
+      e.target.value = "";
   };
 
   if (preview) {
@@ -124,6 +125,7 @@ export default function FileDropZone({
           ref={inputRef}
           type="file"
           accept={acceptStr}
+          multiple={multiple}
           onChange={handleInputChange}
           className="hidden"
         />
