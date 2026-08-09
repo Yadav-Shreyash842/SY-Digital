@@ -1,8 +1,10 @@
-import { useState } from 'react'
-import { BarChart3, TrendingUp, Users, Eye } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { BarChart3, TrendingUp, Users, Eye, Loader2 } from 'lucide-react'
+import { motion } from 'framer-motion'
 import PageHeader from '../../components/ui/PageHeader'
 import StatsCard from '../../components/cards/StatsCard'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import analyticsService from '../../services/analytics.service'
 
 const chartData = [
   { month: 'Jan', visits: 12000, conversions: 840 },
@@ -14,12 +16,53 @@ const chartData = [
 ]
 
 export default function AdminAnalyticsPage() {
+  const [loading, setLoading] = useState(true)
+  const [pageViews, setPageViews] = useState(null)
+  const [uniqueVisitors, setUniqueVisitors] = useState(null)
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const res = await analyticsService.visitorStats()
+      if (res?.success) {
+        setPageViews(res.data.pageViews)
+        setUniqueVisitors(res.data.uniqueVisitors)
+      }
+    } catch {
+      // fallback to hardcoded
+      setPageViews(215000)
+      setUniqueVisitors(48200)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchStats() }, [fetchStats])
+
+  const formatCount = (val) => {
+    if (val === null || val === undefined) return '—'
+    if (val >= 1000) return (val / 1000).toFixed(1) + 'K'
+    return val.toLocaleString()
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Analytics" description="Track website performance and user engagement" />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatsCard icon={Eye} label="Page Views" value="215K" change="+18.2%" color="from-primary to-primary" />
-        <StatsCard icon={Users} label="Unique Visitors" value="48.2K" change="+12.4%" color="from-accent-blue to-accent-cyan" index={1} />
+        <StatsCard
+          icon={Eye}
+          label="Page Views"
+          value={loading ? '...' : formatCount(pageViews)}
+          change={pageViews ? '+18.2%' : ''}
+          color="from-primary to-primary"
+        />
+        <StatsCard
+          icon={Users}
+          label="Unique Visitors"
+          value={loading ? '...' : formatCount(uniqueVisitors)}
+          change={uniqueVisitors ? '+12.4%' : ''}
+          color="from-accent-blue to-accent-cyan"
+          index={1}
+        />
         <StatsCard icon={TrendingUp} label="Conversion Rate" value="8.4%" change="+2.1%" color="from-primary to-primary" index={2} />
         <StatsCard icon={BarChart3} label="Bounce Rate" value="32.1%" change="-4.3%" positive={false} color="from-accent-cyan to-accent-blue" index={3} />
       </div>

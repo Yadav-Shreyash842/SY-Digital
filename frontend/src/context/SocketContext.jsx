@@ -1,4 +1,4 @@
-import { createContext, useRef, useCallback } from 'react'
+import { createContext, useRef, useState, useCallback } from 'react'
 import { io } from 'socket.io-client'
 import { SOCKET_URL } from '../services/apiClient'
 
@@ -6,9 +6,11 @@ const SocketContext = createContext(null)
 
 export function SocketProvider({ children }) {
   const socketRef = useRef(null)
+  const [connected, setConnected] = useState(false)
+  const [connecting, setConnecting] = useState(false)
 
   const connect = useCallback(() => {
-    if (socketRef.current?.connected) return socketRef.current
+    if (socketRef.current) return socketRef.current
 
     const token = localStorage.getItem('sy_digital_token')
     if (!token) return null
@@ -22,18 +24,21 @@ export function SocketProvider({ children }) {
     })
 
     socket.on('connect', () => {
-      console.log('[Socket] Connected:', socket.id)
+      setConnected(true)
+      setConnecting(false)
     })
 
-    socket.on('disconnect', (reason) => {
-      console.log('[Socket] Disconnected:', reason)
+    socket.on('disconnect', () => {
+      setConnected(false)
     })
 
     socket.on('connect_error', (err) => {
+      setConnected(false)
       console.warn('[Socket] Connection error:', err.message)
     })
 
     socketRef.current = socket
+    setConnecting(true)
     return socket
   }, [])
 
@@ -41,11 +46,13 @@ export function SocketProvider({ children }) {
     if (socketRef.current) {
       socketRef.current.disconnect()
       socketRef.current = null
+      setConnected(false)
+      setConnecting(false)
     }
   }, [])
 
   return (
-    <SocketContext.Provider value={{ socketRef, connect, disconnect }}>
+    <SocketContext.Provider value={{ socketRef, connect, disconnect, connected, connecting }}>
       {children}
     </SocketContext.Provider>
   )

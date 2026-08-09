@@ -49,10 +49,12 @@ import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 import ProtectedRoute from './routes/ProtectedRoute'
 import RoleRoute from './routes/RoleRoute'
 import Unauthorized from './components/errors/Unauthorized'
+import PageViewTracker from './components/analytics/PageViewTracker'
 
 export default function App() {
   return (
     <BrowserRouter>
+      <PageViewTracker />
       <Routes>
         <Route element={<PublicLayout />}>
           <Route index element={<HomePage />} />

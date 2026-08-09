@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Share2, Globe, Link2, Mail, MapPin, Phone } from 'lucide-react'
+import { Globe, Camera, Code2, Mail, MapPin, Phone } from 'lucide-react'
 import Logo from '../ui/Logo'
 
 const footerLinks = {
@@ -24,10 +24,10 @@ const footerLinks = {
 }
 
 const socialLinks = [
-  { icon: Share2, href: '#', label: 'Social' },
-  { icon: Globe, href: '#', label: 'Website' },
-  { icon: Link2, href: '#', label: 'Links' },
-  { icon: Mail, href: '#', label: 'Email' },
+  { icon: Camera, href: 'https://www.instagram.com/sy_digital.in?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==', label: 'Instagram' },
+  { icon: Globe, href: 'https://sy-digital.vercel.app/', label: 'Website' },
+  { icon: Code2, href: 'https://github.com/Yadav-Shreyash842', label: 'Github' },
+  { icon: Mail, href: 'mailto:yadavshreyash842@gmail.com', label: 'Email' },
 ]
 
 export default function Footer() {
@@ -43,10 +43,12 @@ export default function Footer() {
               </p>
               <div className="flex gap-3">
                 {socialLinks.map(({ icon: Icon, href, label }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    aria-label={label}
+<a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={label}
                     className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-accent-purple/20 to-accent-orange/20 text-text-secondary transition-all duration-300 hover:shadow-[0_0_25px_rgba(139,92,246,0.3)] hover:text-white hover:scale-110"
                   >
                     <Icon strokeWidth={1.75} className="h-5 w-5" />
@@ -88,19 +90,19 @@ export default function Footer() {
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-accent-purple/20 to-accent-orange/20 shrink-0">
                     <Mail strokeWidth={1.75} className="h-3.5 w-3.5 text-accent-purple" />
                   </div>
-                  <span>hello@sydigital.com</span>
+                  <span>yadavshreyash842<br></br>@gmail.com</span>
                 </li>
                 <li className="flex items-start gap-3 text-text-secondary">
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-accent-purple/20 to-accent-orange/20 shrink-0">
                     <Phone strokeWidth={1.75} className="h-3.5 w-3.5 text-accent-purple" />
                   </div>
-                  <span>+1 (555) 123-4567</span>
+                  <span>+91 8320813073</span>
                 </li>
                 <li className="flex items-start gap-3 text-text-secondary">
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-accent-purple/20 to-accent-orange/20 shrink-0">
                     <MapPin strokeWidth={1.75} className="h-3.5 w-3.5 text-accent-purple" />
                   </div>
-                  <span>San Francisco, CA 94102</span>
+                  <span>104, 105 dk nagar godadara surat, gujrat</span>
                 </li>
               </ul>
               <div className="mt-6 space-y-2">
@@ -119,8 +121,8 @@ export default function Footer() {
               © {new Date().getFullYear()} SY Digital. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm text-text-muted">
-              <a href="#" className="transition-colors duration-300 hover:text-white">Privacy Policy</a>
-              <a href="#" className="transition-colors duration-300 hover:text-white">Terms of Service</a>
+              <Link to="/privacy" className="transition-colors duration-300 hover:text-white">Privacy Policy</Link>
+              <Link to="/terms" className="transition-colors duration-300 hover:text-white">Terms of Service</Link>
               <a href="#" className="transition-colors duration-300 hover:text-white">Cookies</a>
             </div>
           </div>

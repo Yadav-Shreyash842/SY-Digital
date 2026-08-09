@@ -25,6 +25,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import Logo from '../components/ui/Logo'
 import useAuth from '../hooks/useAuth'
+import NotificationBell from '../components/admin/notifications/NotificationBell'
+import LiveToasts from '../components/admin/notifications/LiveToasts'
 
 const sidebarLinks = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/admin' },
@@ -45,17 +47,15 @@ const sidebarLinks = [
   { icon: User, label: 'Profile', to: '/admin/profile' },
 ]
 
-export default function AdminLayout() {
-  const [collapsed, setCollapsed] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
-
-  const userInitials = user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'AD'
-  const userFullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Admin'
-  const userRole = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Admin'
-
-  const SidebarContent = ({ mobile = false }) => (
+function SidebarContent({
+  collapsed,
+  mobile,
+  onToggleCollapse,
+  onCloseMobile,
+  logout,
+  navigate,
+}) {
+  return (
     <div className="flex h-full flex-col bg-sidebar-bg text-white">
       <div className="flex h-[88px] items-center justify-between border-b border-border px-5">
         {!collapsed && <Logo />}
@@ -67,7 +67,7 @@ export default function AdminLayout() {
         {!mobile && (
           <button
             type="button"
-            onClick={() => setCollapsed(!collapsed)}
+            onClick={onToggleCollapse}
             className="hidden lg:flex h-10 w-10 items-center justify-center rounded-btn border border-border text-white hover:bg-white/5"
           >
             <ChevronLeft strokeWidth={1.75} className={`h-5 w-5 transition-transform ${collapsed ? 'rotate-180' : ''}`} />
@@ -83,7 +83,7 @@ export default function AdminLayout() {
               key={to}
               to={to}
               end={to === '/admin'}
-              onClick={() => mobile && setMobileOpen(false)}
+              onClick={() => mobile && onCloseMobile()}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-btn px-4 py-3 text-sm font-medium transition-all duration-300 ${
                   isActive
@@ -104,7 +104,7 @@ export default function AdminLayout() {
             <NavLink
               key={to}
               to={to}
-              onClick={() => mobile && setMobileOpen(false)}
+              onClick={() => mobile && onCloseMobile()}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-btn px-4 py-3 text-sm font-medium transition-all duration-300 ${
                   isActive
@@ -125,7 +125,7 @@ export default function AdminLayout() {
             <NavLink
               key={to}
               to={to}
-              onClick={() => mobile && setMobileOpen(false)}
+              onClick={() => mobile && onCloseMobile()}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-btn px-4 py-3 text-sm font-medium transition-all duration-300 ${
                   isActive
@@ -159,16 +159,35 @@ export default function AdminLayout() {
         </button>
       </div>
     </div>
-  )
+  );
+}
+
+export default function AdminLayout() {
+  const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const userInitials = user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'AD'
+  const userFullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Admin'
+  const userRole = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Admin'
 
   return (
     <div className="flex min-h-screen bg-primary-bg text-white">
+      <LiveToasts />
       <aside
         className={`fixed inset-y-0 left-0 z-40 hidden border-r border-border bg-sidebar-bg transition-all duration-300 lg:block ${
           collapsed ? 'w-[96px]' : 'w-[300px]'
         }`}
       >
-        <SidebarContent />
+        <SidebarContent
+          collapsed={collapsed}
+          mobile={false}
+          onToggleCollapse={() => setCollapsed(!collapsed)}
+          onCloseMobile={() => setMobileOpen(false)}
+          logout={logout}
+          navigate={navigate}
+        />
       </aside>
 
       <AnimatePresence>
@@ -188,7 +207,14 @@ export default function AdminLayout() {
               transition={{ duration: 0.35, ease: 'easeInOut' }}
               className="fixed inset-y-0 left-0 z-50 w-[300px] border-r border-border bg-sidebar-bg lg:hidden"
             >
-              <SidebarContent mobile />
+              <SidebarContent
+                mobile
+                collapsed={collapsed}
+                onToggleCollapse={() => setCollapsed(!collapsed)}
+                onCloseMobile={() => setMobileOpen(false)}
+                logout={logout}
+                navigate={navigate}
+              />
             </motion.aside>
           </>
         )}
@@ -216,13 +242,7 @@ export default function AdminLayout() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                className="relative inline-flex h-12 w-12 items-center justify-center rounded-btn border border-border bg-white/5 text-white transition hover:bg-white/10"
-              >
-                <Bell strokeWidth={1.75} className="h-5 w-5" />
-                <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-warning ring-2 ring-primary-bg" />
-              </button>
+              <NotificationBell />
               <div className="flex items-center gap-3 rounded-btn border border-border bg-white/5 px-4 py-2">
                 <div className="flex h-10 w-10 items-center justify-center rounded-btn bg-gradient-to-br from-primary to-accent-orange text-sm font-bold text-white">
                   {userInitials}

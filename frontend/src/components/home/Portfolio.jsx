@@ -15,15 +15,57 @@ const gradients = [
   'from-accent-orange/80 to-primary/80',
 ]
 
+const FEATURED_TTL = 60 * 1000
+
+let featuredCache = {
+  data: null,
+  expiresAt: 0,
+  inFlight: null,
+}
+
 export default function Portfolio() {
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    projectService.featured()
-      .then((res) => setProjects(res?.data || []))
-      .catch(() => setProjects([]))
-      .finally(() => setLoading(false))
+    let cancelled = false
+
+    const load = () => {
+      if (featuredCache.data && featuredCache.expiresAt > Date.now()) {
+        setProjects(featuredCache.data)
+        setLoading(false)
+        return
+      }
+
+      if (!featuredCache.inFlight) {
+        featuredCache.inFlight = projectService
+          .featured()
+          .then((res) => {
+            const data = res?.data || []
+            featuredCache.data = data
+            featuredCache.expiresAt = Date.now() + FEATURED_TTL
+            return data
+          })
+          .catch(() => [])
+          .finally(() => {
+            featuredCache.inFlight = null
+          })
+      }
+
+      featuredCache.inFlight
+        .then((data) => {
+          if (!cancelled) {
+            setProjects(data)
+            setLoading(false)
+          }
+        })
+    }
+
+    load()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   return (

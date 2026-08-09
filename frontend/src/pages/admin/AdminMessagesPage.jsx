@@ -100,7 +100,7 @@ function buildMessageFeed(msg) {
 }
 
 export default function AdminMessagesPage() {
-  const { connect } = useSocket()
+  const { connect, connected, connecting } = useSocket()
   const chatEndRef = useRef(null)
 
   const [messages, setMessages] = useState([])
@@ -352,6 +352,16 @@ export default function AdminMessagesPage() {
               {unreadCount} unread
             </span>
           )}
+          <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold ${
+            connected
+              ? 'border-success/20 bg-success/10 text-success'
+              : connecting
+                ? 'border-warning/20 bg-warning/10 text-warning'
+                : 'border-danger/20 bg-danger/10 text-danger'
+          }`}>
+            <span className={`h-2 w-2 rounded-full ${connected ? 'bg-success' : connecting ? 'bg-warning animate-pulse' : 'bg-danger'}`} />
+            {connected ? 'Live' : connecting ? 'Connecting...' : 'Offline'}
+          </span>
         </div>
       </motion.div>
 

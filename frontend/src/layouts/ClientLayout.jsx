@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
   Bell,
   Search,
@@ -26,6 +26,7 @@ const sections = [
 export default function ClientLayout() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
 
   const userFullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Client'
   const userInitials = user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'CL'
@@ -67,7 +68,7 @@ export default function ClientLayout() {
         ))}
       </div>
 
-      <div className="border-t border-border px-4 py-5">
+      <div className="border-t border-border px-4 py-5 space-y-2">
         <Link
           to="/"
           className="flex items-center gap-3 rounded-btn bg-white/5 px-4 py-3 text-sm font-medium text-text-secondary transition hover:bg-white/10 hover:text-white"
@@ -75,6 +76,13 @@ export default function ClientLayout() {
           <LogOut strokeWidth={1.75} className="h-5 w-5" />
           <span>Back to Site</span>
         </Link>
+        <button
+          onClick={() => { logout(); navigate('/login') }}
+          className="flex w-full items-center gap-3 rounded-btn bg-danger/10 px-4 py-3 text-sm font-medium text-danger transition hover:bg-danger/20"
+        >
+          <LogOut strokeWidth={1.75} className="h-5 w-5" />
+          <span>Logout</span>
+        </button>
       </div>
     </div>
   )
