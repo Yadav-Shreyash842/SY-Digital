@@ -29,6 +29,27 @@ const PROJECT_SELECT = [
     "updatedAt",
 ].join(" ");
 
+const FEATURED_SELECT = [
+    "title",
+    "slug",
+    "category",
+    "images",
+].join(" ");
+
+const FEATURED_CACHE_TTL_MS = 60 * 1000;
+
+let featuredCache = {
+    data: null,
+    expiresAt: 0,
+};
+
+const clearFeaturedCache = () => {
+    featuredCache = {
+        data: null,
+        expiresAt: 0,
+    };
+};
+
 const MAX_LIMIT = 100;
 
 const escapeRegex = (value = "") => {
@@ -178,6 +199,8 @@ const createProject = async (projectData, userId) => {
         createdBy: userId,
     });
 
+    clearFeaturedCache();
+
     return project;
 };
 
@@ -304,6 +327,8 @@ const updateProject = async (projectId, updateData) => {
 
     await project.save();
 
+    clearFeaturedCache();
+
     return project;
 };
 
@@ -320,11 +345,17 @@ const deleteProject = async (projectId) => {
         );
     }
 
+    clearFeaturedCache();
+
     return project;
 
 };
 
 const getFeaturedProjects = async () => {
+
+    if (featuredCache.data && featuredCache.expiresAt > Date.now()) {
+        return featuredCache.data;
+    }
 
     const projects = await Project.find({
 
@@ -333,13 +364,18 @@ const getFeaturedProjects = async () => {
         status: "published",
 
     })
-        .select(PROJECT_SELECT)
+        .select(FEATURED_SELECT)
         .sort({
 
             createdAt: -1,
 
         })
         .lean();
+
+    featuredCache = {
+        data: projects,
+        expiresAt: Date.now() + FEATURED_CACHE_TTL_MS,
+    };
 
     return projects;
 

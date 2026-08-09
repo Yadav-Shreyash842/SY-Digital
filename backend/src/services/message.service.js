@@ -8,6 +8,10 @@ const logger = require("../middlewares/logger");
 const { createNotification } = require("./notification.service");
 const { sendEmail } = require("./email.service");
 const contactReply = require("../emails/contactReply");
+const adminAlert = require("../emails/adminAlert");
+
+const getAdminEmail = () =>
+    process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
 
 
 const createMessage = async (messageData) => {
@@ -65,6 +69,27 @@ try {
     logger.warn(`[Socket.IO] ${error.message}`);
 
 }
+
+sendEmail({
+    to: getAdminEmail(),
+    subject: `New Contact Message from ${message.name}`,
+    html: adminAlert({
+        leadName: message.name,
+        leadEmail: message.email,
+        type: "Contact Message",
+        details: [
+            `Subject: ${message.subject}`,
+            message.phone ? `Phone: ${message.phone}` : "",
+            message.service?.title ? `Service: ${message.service.title}` : "",
+            "",
+            message.message,
+        ]
+            .filter(Boolean)
+            .join("\n"),
+    }),
+}).catch((error) =>
+    logger.warn(`[Message] Admin alert email failed: ${error.message}`)
+);
 
 return message;
 

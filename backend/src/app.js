@@ -24,6 +24,8 @@ const clientRoutes = require("./routes/client.routes");
 const projectRequestRoutes = require("./routes/projectRequest.routes");
 const aiRoutes = require("./routes/ai.routes");
 const ApiError = require("./utils/ApiError");
+const trackRoutes = require("./routes/track.routes");
+const analyticsRoutes = require("./routes/analytics.routes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./docs/swagger");
 
@@ -93,12 +95,14 @@ app.get("/", (req, res) => {
 // Swagger Docs
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+app.use("/api/track", trackRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/admin/dashboard", adminLimiter, dashboardRoutes);
+app.use("/api/admin/analytics", adminLimiter, analyticsRoutes);
 app.use("/api/meetings", adminLimiter, meetingRoutes);
 app.use("/api/payments", adminLimiter, paymentRoutes);
 app.use("/api/messages", adminLimiter, messageRoutes);

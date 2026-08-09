@@ -4,8 +4,24 @@ const Message = require("../models/Message");
 const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponse");
 const logger = require("../middlewares/logger");
+const { createNotification } = require("../services/notification.service");
+const { sendEmail } = require("../services/email.service");
+const adminAlert = require("../emails/adminAlert");
 
 const VALID_STATUSES = ["pending", "reviewing", "approved", "rejected"];
+
+const getAdminEmail = () =>
+    process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+
+const sendAdminAlert = (payload) => {
+    sendEmail({
+        to: getAdminEmail(),
+        subject: `New ${payload.type} from ${payload.leadName}`,
+        html: adminAlert(payload),
+    }).catch((error) =>
+        logger.warn(`[ProjectRequest] Admin alert email failed: ${error.message}`)
+    );
+};
 
 const create = async (req, res, next) => {
     try {
@@ -31,6 +47,25 @@ const create = async (req, res, next) => {
         } catch (err) {
             logger.warn(`[Socket.IO] ${err.message}`);
         }
+
+        try {
+            await createNotification({
+                title: "New Project Request",
+                message: `${projectRequest.clientName} (${projectRequest.clientEmail}) submitted: "${projectRequest.title}"`,
+                type: "project",
+                referenceId: projectRequest._id,
+                referenceModel: "ProjectRequest",
+            });
+        } catch (err) {
+            logger.warn(`[Notification Service] ${err.message}`);
+        }
+
+        sendAdminAlert({
+            leadName: projectRequest.clientName,
+            leadEmail: projectRequest.clientEmail,
+            type: "Project Request",
+            details: `Title: ${projectRequest.title}\nCategory: ${projectRequest.category}\nDescription:\n${projectRequest.description}`,
+        });
 
         return res.status(201).json(
             new ApiResponse(201, "Project request submitted successfully", projectRequest)
@@ -175,6 +210,18 @@ const updateStatus = async (req, res, next) => {
             logger.warn(`[Socket.IO] ${err.message}`);
         }
 
+        try {
+            await createNotification({
+                title: "Project Request Updated",
+                message: `Request "${projectRequest.title}" from ${projectRequest.clientName} is now ${status}.`,
+                type: "project",
+                referenceId: projectRequest._id,
+                referenceModel: "ProjectRequest",
+            });
+        } catch (err) {
+            logger.warn(`[Notification Service] ${err.message}`);
+        }
+
         return res.status(200).json(
             new ApiResponse(200, "Project request status updated successfully", projectRequest)
         );
@@ -214,6 +261,25 @@ const createPublic = async (req, res, next) => {
         } catch (err) {
             logger.warn(`[Socket.IO] ${err.message}`);
         }
+
+        try {
+            await createNotification({
+                title: "New Project Request",
+                message: `${projectRequest.clientName} (${projectRequest.clientEmail}) submitted: "${projectRequest.title}"`,
+                type: "project",
+                referenceId: projectRequest._id,
+                referenceModel: "ProjectRequest",
+            });
+        } catch (err) {
+            logger.warn(`[Notification Service] ${err.message}`);
+        }
+
+        sendAdminAlert({
+            leadName: projectRequest.clientName,
+            leadEmail: projectRequest.clientEmail,
+            type: "Project Request",
+            details: `Title: ${projectRequest.title}\nCategory: ${projectRequest.category}\nDescription:\n${projectRequest.description}`,
+        });
 
         return res.status(201).json(
             new ApiResponse(201, "Project request submitted successfully", projectRequest)

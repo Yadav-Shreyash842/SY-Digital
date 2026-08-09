@@ -26,6 +26,8 @@ const env = cleanEnv(process.env, {
 
     EMAIL_PASS: str(),
 
+    ADMIN_EMAIL: str({ default: "" }),
+
     CLIENT_URL: str({ default: "http://localhost:5173" }),
 
     GROQ_API_KEY: str({ default: "" }),

@@ -121,9 +121,21 @@ const projectSchema = new mongoose.Schema(
 );
 
 projectSchema.index({ category: 1 });
-projectSchema.index({ status: 1 });
-projectSchema.index({ isFeatured: 1 });
 projectSchema.index({ createdBy: 1 });
+
+projectSchema.index(
+    {
+        isFeatured: 1,
+        status: 1,
+        createdAt: -1,
+    },
+    {
+        partialFilterExpression: {
+            isFeatured: true,
+            status: "published",
+        },
+    }
+);
 
 projectSchema.index({
     title: "text",
