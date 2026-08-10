@@ -154,20 +154,17 @@ const updateStatus = async (req, res, next) => {
             if (clientUser) {
                 emitToClient(clientUser._id.toString(), "projectRequestUpdated", { request: projectRequest });
             }
-        } catch (err) {
-            logger.warn(`[Socket.IO] ${err.message}`);
-        }
 
-        try {
             await createNotification({
                 title: "Project Request Updated",
                 message: `Request "${projectRequest.title}" from ${projectRequest.clientName} is now ${status}.`,
                 type: "project",
                 referenceId: projectRequest._id,
                 referenceModel: "ProjectRequest",
+                createdFor: clientUser ? clientUser._id : undefined,
             });
         } catch (err) {
-            logger.warn(`[Notification Service] ${err.message}`);
+            logger.warn(`[Socket.IO] ${err.message}`);
         }
 
         return res.status(200).json(

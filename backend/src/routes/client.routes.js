@@ -10,10 +10,69 @@ const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponse");
 const { emitToAdmins } = require("../socket/socketEmitter");
 
+const {
+    getClientNotifications,
+    getClientNotificationStats,
+    markClientNotificationAsRead,
+    markAllClientNotificationsAsRead,
+} = require("../services/notification.service");
+
 const router = express.Router();
 
 // All client routes require auth + client role
 router.use(auth, authorize(ROLES.CLIENT));
+
+// GET /api/client/notifications - client's own notifications
+router.get("/notifications", async (req, res, next) => {
+    try {
+        const notifications = await getClientNotifications(req.user._id, req.query);
+
+        return res.status(200).json(
+            new ApiResponse(200, "Notifications fetched successfully", notifications)
+        );
+    } catch (error) {
+        next(error);
+    }
+});
+
+// GET /api/client/notifications/stats - client's notification stats
+router.get("/notifications/stats", async (req, res, next) => {
+    try {
+        const stats = await getClientNotificationStats(req.user._id);
+
+        return res.status(200).json(
+            new ApiResponse(200, "Notification statistics fetched successfully", stats)
+        );
+    } catch (error) {
+        next(error);
+    }
+});
+
+// PATCH /api/client/notifications/read-all
+router.patch("/notifications/read-all", async (req, res, next) => {
+    try {
+        await markAllClientNotificationsAsRead(req.user._id);
+
+        return res.status(200).json(
+            new ApiResponse(200, "All notifications marked as read")
+        );
+    } catch (error) {
+        next(error);
+    }
+});
+
+// PATCH /api/client/notifications/:id/read
+router.patch("/notifications/:id/read", async (req, res, next) => {
+    try {
+        const notification = await markClientNotificationAsRead(req.params.id, req.user._id);
+
+        return res.status(200).json(
+            new ApiResponse(200, "Notification marked as read", notification)
+        );
+    } catch (error) {
+        next(error);
+    }
+});
 
 // GET /api/client/meetings - client's own meetings
 router.get("/meetings", async (req, res, next) => {

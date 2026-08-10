@@ -37,6 +37,22 @@ export const clientService = {
     const res = await apiClient.get('/api/client/project-requests')
     return res?.data
   },
+  notifications: async (params) => {
+    const res = await apiClient.get('/api/client/notifications', { params })
+    return res?.data
+  },
+  notificationStats: async () => {
+    const res = await apiClient.get('/api/client/notifications/stats')
+    return res?.data
+  },
+  markNotificationRead: async (id) => {
+    const res = await apiClient.patch(`/api/client/notifications/${id}/read`)
+    return res?.data
+  },
+  markAllNotificationsRead: async () => {
+    const res = await apiClient.patch('/api/client/notifications/read-all')
+    return res?.data
+  },
 }
 
 export default clientService

@@ -1,4 +1,4 @@
-const { emitToAdmins } = require("../socket/socketEmitter");
+const { emitToAdmins, emitToClient } = require("../socket/socketEmitter");
 const Notification = require("../models/Notification");
 const ApiError = require("../utils/ApiError");
 const logger = require("../middlewares/logger");
@@ -39,6 +39,22 @@ const createNotification = async ({
     logger.warn(`[Socket.IO] ${error.message}`);
 
 }
+
+    if (createdFor) {
+
+        try {
+
+            emitToClient(createdFor, "newNotification", {
+                notification,
+            });
+
+        } catch (error) {
+
+            logger.warn(`[Socket.IO] ${error.message}`);
+
+        }
+
+    }
 
     return notification;
 
@@ -335,6 +351,174 @@ const getRecentNotifications = async () => {
 };
 
 
+const getClientNotifications = async (userId, query) => {
+
+    const page = Number(query.page) || 1;
+
+    const limit = Number(query.limit) || 10;
+
+    const skip = (page - 1) * limit;
+
+    const filter = {
+
+        createdFor: userId,
+
+    };
+
+    if (query.type) {
+
+        filter.type = query.type;
+
+    }
+
+    if (query.isRead !== undefined) {
+
+        filter.isRead = query.isRead === "true";
+
+    }
+
+    const [notifications, total] = await Promise.all([
+
+        Notification.find(filter)
+
+            .sort({ createdAt: -1 })
+
+            .skip(skip)
+
+            .limit(limit),
+
+        Notification.countDocuments(filter),
+
+    ]);
+
+    return {
+
+        notifications,
+
+        pagination: {
+
+            total,
+
+            page,
+
+            limit,
+
+            totalPages: Math.ceil(total / limit),
+
+        },
+
+    };
+
+};
+
+
+const getClientNotificationStats = async (userId) => {
+
+    const [totalNotifications, unreadNotifications, readNotifications] =
+
+        await Promise.all([
+
+            Notification.countDocuments({ createdFor: userId }),
+
+            Notification.countDocuments({ createdFor: userId, isRead: false }),
+
+            Notification.countDocuments({ createdFor: userId, isRead: true }),
+
+        ]);
+
+    return {
+
+        totalNotifications,
+
+        unreadNotifications,
+
+        readNotifications,
+
+    };
+
+};
+
+
+const markClientNotificationAsRead = async (notificationId, userId) => {
+
+    const notification = await Notification.findOne({
+
+        _id: notificationId,
+
+        createdFor: userId,
+
+    });
+
+    if (!notification) {
+
+        throw new ApiError(404, "Notification not found");
+
+    }
+
+    notification.isRead = true;
+
+    await notification.save();
+
+    try {
+
+        emitToClient(userId, "notificationRead", {
+
+            notificationId: notification._id,
+
+            notification,
+
+        });
+
+    } catch (error) {
+
+        logger.warn(`[Socket.IO] ${error.message}`);
+
+    }
+
+    return notification;
+
+};
+
+
+const markAllClientNotificationsAsRead = async (userId) => {
+
+    const result = await Notification.updateMany(
+
+        {
+
+            createdFor: userId,
+
+            isRead: false,
+
+        },
+
+        {
+
+            $set: {
+
+                isRead: true,
+
+            },
+
+        }
+
+    );
+
+    try {
+
+        emitToClient(userId, "allNotificationsRead", {});
+
+    } catch (error) {
+
+        logger.warn(`[Socket.IO] ${error.message}`);
+
+    }
+
+    return result;
+
+};
+
+
 module.exports = {
 
     createNotification,
@@ -354,6 +538,14 @@ module.exports = {
     getNotificationTypeAnalytics,
 
     getRecentNotifications,
+
+    getClientNotifications,
+
+    getClientNotificationStats,
+
+    markClientNotificationAsRead,
+
+    markAllClientNotificationsAsRead,
 
 };
 

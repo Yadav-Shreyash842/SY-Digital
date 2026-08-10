@@ -318,26 +318,28 @@ try {
 }
 
 // Notification + client emit are fire-and-forget — never block the reply response
-createNotification({
-
-    title: "Message Replied",
-
-    message: `Reply sent to ${message.name}.`,
-
-    type: "message",
-
-    referenceId: message._id,
-
-    referenceModel: "Message",
-
-}).catch((error) => logger.warn(`[Notification Service] ${error.message}`));
-
 (async () => {
     try {
 
         const clientUser = await User.findOne({ email: message.email }).select("_id");
 
         if (clientUser) {
+
+            createNotification({
+
+                title: "Message Replied",
+
+                message: "You received a reply to your message.",
+
+                type: "message",
+
+                referenceId: message._id,
+
+                referenceModel: "Message",
+
+                createdFor: clientUser._id,
+
+            }).catch((error) => logger.warn(`[Notification Service] ${error.message}`));
 
             emitToClient(clientUser._id, "messageReplied", { message });
 

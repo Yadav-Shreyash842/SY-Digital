@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
-  Bell,
   Search,
   Menu,
   LogOut,
@@ -17,6 +16,7 @@ import Logo from '../components/ui/Logo'
 import Avatar from '../components/ui/Avatar'
 import { clientNavLinks } from '../constants/navigation'
 import useAuth from '../hooks/useAuth'
+import ClientNotificationBell from '../components/client/ClientNotificationBell'
 
 const sections = [
   { title: 'Workspace', items: clientNavLinks.slice(0, 5) },
@@ -138,13 +138,7 @@ export default function ClientLayout() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                className="relative inline-flex h-12 w-12 items-center justify-center rounded-btn border border-border bg-white/5 text-white transition hover:bg-white/10"
-              >
-                <Bell strokeWidth={1.75} className="h-5 w-5" />
-                <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-warning ring-2 ring-primary-bg" />
-              </button>
+              <ClientNotificationBell />
               <button
                 type="button"
                 className="inline-flex items-center gap-3 rounded-btn border border-border bg-white/5 px-3 py-2 text-sm text-white transition hover:bg-white/10"

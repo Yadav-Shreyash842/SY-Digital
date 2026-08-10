@@ -3,6 +3,8 @@ const Meeting = require("../models/Meeting");
 const ApiError = require("../utils/ApiError");
 const logger = require("../middlewares/logger");
 const { emitToAdmins } = require("../socket/socketEmitter");
+const { emitToClient } = require("../socket/socketEmitter");
+const User = require("../models/User");
 const { createNotification } = require("./notification.service");
 const { sendEmail } = require("./email.service");
 const meetingConfirmation = require("../emails/meetingConfirmation");
@@ -66,6 +68,30 @@ const fireMeetingSideEffects = async (notificationPayload, socketEvent, socketPa
       }
     }),
   ]);
+};
+
+/**
+ * Fire-and-forget: notify the registered client who booked this meeting.
+ * Looks the user up by the meeting email — no-ops when the booker is not a user.
+ */
+const fireClientMeetingSideEffects = async (meeting, notificationPayload, socketEvent, socketPayload) => {
+  try {
+    const clientUser = await User.findOne({ email: meeting.email }).select("_id");
+
+    if (!clientUser) return;
+
+    createNotification({ ...notificationPayload, createdFor: clientUser._id }).catch((err) =>
+      logger.warn(`[Meeting] Client notification error: ${err.message}`)
+    );
+
+    try {
+      emitToClient(clientUser._id, socketEvent, socketPayload);
+    } catch (err) {
+      logger.warn(`[Meeting] Client socket error: ${err.message}`);
+    }
+  } catch (err) {
+    logger.warn(`[Meeting] Client notification lookup error: ${err.message}`);
+  }
 };
 
 // ─── Service Functions ───────────────────────────────────────────────────────
@@ -270,6 +296,19 @@ const updateMeetingStatus = async (
     { meetingId: meeting._id, status, meeting }
   );
 
+  fireClientMeetingSideEffects(
+    meeting,
+    {
+      title: "Meeting Status Updated",
+      message: `Your meeting status changed to ${status}.`,
+      type: "meeting",
+      referenceId: meeting._id,
+      referenceModel: "Meeting",
+    },
+    "meetingStatusUpdated",
+    { meetingId: meeting._id, status, meeting }
+  );
+
   return meeting;
 };
 
@@ -313,6 +352,19 @@ const rescheduleMeeting = async (meetingId, meetingDate, meetingTime) => {
     { meeting }
   );
 
+  fireClientMeetingSideEffects(
+    meeting,
+    {
+      title: "Meeting Rescheduled",
+      message: `Your meeting has been rescheduled to ${meetingDate} at ${meetingTime}.`,
+      type: "meeting",
+      referenceId: meeting._id,
+      referenceModel: "Meeting",
+    },
+    "meetingRescheduled",
+    { meeting }
+  );
+
   return meeting;
 };
 
@@ -345,6 +397,19 @@ const cancelMeeting = async (meetingId, reason) => {
     {
       title: "Meeting Cancelled",
       message: `${meeting.name}'s meeting has been cancelled.`,
+      type: "meeting",
+      referenceId: meeting._id,
+      referenceModel: "Meeting",
+    },
+    "meetingCancelled",
+    { meeting }
+  );
+
+  fireClientMeetingSideEffects(
+    meeting,
+    {
+      title: "Meeting Cancelled",
+      message: "Your meeting has been cancelled.",
       type: "meeting",
       referenceId: meeting._id,
       referenceModel: "Meeting",
