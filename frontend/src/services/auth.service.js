@@ -50,6 +50,14 @@ export const authService = {
     const res = await apiClient.patch('/api/auth/change-password', { currentPassword, newPassword })
     return res?.data
   },
+  sendVerification: async (email) => {
+    const res = await apiClient.post('/api/auth/send-verification', { email })
+    return res?.data
+  },
+  verifyEmail: async (token) => {
+    const res = await apiClient.post('/api/auth/verify-email', { token })
+    return res?.data
+  },
 }
 
 export default authService

@@ -21,6 +21,7 @@ const {
 
 const {
     blogValidator,
+    updateBlogValidator,
 } = require("../validators/blog.validator");
 
 router.post(
@@ -65,6 +66,8 @@ router.patch(
     "/:id",
     auth,
     authorize(ROLES.ADMIN),
+    updateBlogValidator,
+    validate,
     update
 );
 

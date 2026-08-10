@@ -76,6 +76,18 @@ const messageSchema = new mongoose.Schema(
     default: "",
 },
 
+        adminReplies: [
+            {
+                text: { type: String, trim: true },
+                repliedBy: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "User",
+                    default: null,
+                },
+                createdAt: { type: Date, default: Date.now },
+            },
+        ],
+
         clientReplies: [
             {
                 text: { type: String, trim: true },

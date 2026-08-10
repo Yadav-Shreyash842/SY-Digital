@@ -1,4 +1,4 @@
-const { registerUser, loginUser, forgotPassword, resetPassword, updateProfile, changePassword } = require("../services/auth.service");
+const { registerUser, loginUser, forgotPassword, resetPassword, updateProfile, changePassword, resendVerificationEmail, verifyEmail } = require("../services/auth.service");
 const ApiResponse = require("../utils/ApiResponse");
 
 const register = async (req, res, next) => {
@@ -111,6 +111,38 @@ const changePasswordHandler = async (req, res, next) => {
     }
 };
 
+const sendVerificationHandler = async (req, res, next) => {
+    try {
+        const result = await resendVerificationEmail(req.body.email);
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                result.message,
+                null
+            )
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
+const verifyEmailHandler = async (req, res, next) => {
+    try {
+        const result = await verifyEmail(req.body.token);
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                result.message,
+                null
+            )
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     register,
     login,
@@ -119,4 +151,6 @@ module.exports = {
     resetPassword: resetPasswordHandler,
     updateProfile: updateProfileHandler,
     changePassword: changePasswordHandler,
+    sendVerification: sendVerificationHandler,
+    verifyEmail: verifyEmailHandler,
 };

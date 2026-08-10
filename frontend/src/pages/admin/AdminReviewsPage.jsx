@@ -9,6 +9,7 @@ import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import Badge from '../../components/ui/Badge'
 import reviewService from '../../services/review.service'
+import useSocket from '../../hooks/useSocket'
 import ReviewStatsCards from '../../components/admin/reviews/ReviewStatsCards'
 import ReviewFilterBar from '../../components/admin/reviews/ReviewFilterBar'
 import ReviewDataTable from '../../components/admin/reviews/ReviewDataTable'
@@ -21,6 +22,8 @@ function formatDate(dateStr) {
 }
 
 export default function AdminReviewsPage() {
+  const { connect } = useSocket()
+
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState(null)
@@ -80,6 +83,22 @@ export default function AdminReviewsPage() {
   useEffect(() => { fetchData() }, [fetchData])
   useEffect(() => { fetchStats() }, [fetchStats])
   useEffect(() => { setPage(1) }, [search, statusFilter, ratingFilter, featuredFilter])
+
+  useEffect(() => {
+    const socket = connect()
+    if (!socket) return
+    const refresh = () => { fetchData(); fetchStats() }
+    socket.on('reviewApproved', refresh)
+    socket.on('reviewRejected', refresh)
+    socket.on('reviewUpdated', refresh)
+    socket.on('reviewDeleted', refresh)
+    return () => {
+      socket.off('reviewApproved', refresh)
+      socket.off('reviewRejected', refresh)
+      socket.off('reviewUpdated', refresh)
+      socket.off('reviewDeleted', refresh)
+    }
+  }, [connect, fetchData, fetchStats])
 
   const ratingDistribution = useMemo(() => {
     const map = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }

@@ -13,6 +13,8 @@ const {
     resetPassword,
     updateProfile,
     changePassword,
+    sendVerification,
+    verifyEmail,
 } = require("../controllers/auth.controller");
 
 const {
@@ -22,6 +24,8 @@ const {
     resetPasswordValidator,
     updateProfileValidator,
     changePasswordValidator,
+    sendVerificationValidator,
+    verifyEmailValidator,
 } = require("../validators/auth.validator");
 
 const validate = require("../middlewares/validate");
@@ -81,6 +85,22 @@ router.post(
     resetPasswordValidator,
     validate,
     resetPassword
+);
+
+// Send verification email
+router.post(
+    "/send-verification",
+    sendVerificationValidator,
+    validate,
+    sendVerification
+);
+
+// Verify email
+router.post(
+    "/verify-email",
+    verifyEmailValidator,
+    validate,
+    verifyEmail
 );
 
 //admin

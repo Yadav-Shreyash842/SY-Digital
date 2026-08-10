@@ -38,28 +38,6 @@ await message.populate("service", "title");
 
 try {
 
-    await createNotification({
-
-        title: "New Contact Message",
-
-        message: `${message.name} sent a new contact message.`,
-
-        type: "message",
-
-        referenceId: message._id,
-
-        referenceModel: "Message",
-
-    });
-
-} catch (error) {
-
-    logger.warn(`[Notification Service] ${error.message}`);
-
-}
-
-try {
-
     emitToAdmins("newMessage", {
         message,
     });
@@ -69,6 +47,20 @@ try {
     logger.warn(`[Socket.IO] ${error.message}`);
 
 }
+
+createNotification({
+
+    title: "New Contact Message",
+
+    message: `${message.name} sent a new contact message.`,
+
+    type: "message",
+
+    referenceId: message._id,
+
+    referenceModel: "Message",
+
+}).catch((error) => logger.warn(`[Notification Service] ${error.message}`));
 
 sendEmail({
     to: getAdminEmail(),
@@ -228,6 +220,22 @@ try {
 
 }
 
+try {
+
+    const clientUser = await User.findOne({ email: message.email }).select("_id");
+
+    if (clientUser) {
+
+        emitToClient(clientUser._id, "messageStatusUpdated", { message });
+
+    }
+
+} catch (error) {
+
+    logger.warn(`[Socket.IO] ${error.message}`);
+
+}
+
 
 
     return message;
@@ -273,7 +281,18 @@ const replyToMessage = async (messageId, reply, adminId) => {
 
     }
 
+    const legacyAdminReply = message.adminReply;
+
     message.adminReply = reply;
+
+    if (message.adminReplies.length === 0 && legacyAdminReply) {
+        message.adminReplies.push({
+            text: legacyAdminReply,
+            repliedBy: message.repliedBy,
+        });
+    }
+
+    message.adminReplies.push({ text: reply, repliedBy: adminId });
 
     message.status = "replied";
 
@@ -283,52 +302,6 @@ const replyToMessage = async (messageId, reply, adminId) => {
 
     await message.save();
     await message.populate("service", "title");
-
-try {
-
-    await createNotification({
-
-        title: "Message Replied",
-
-        message: `Reply sent to ${message.name}.`,
-
-        type: "message",
-
-        referenceId: message._id,
-
-        referenceModel: "Message",
-
-    });
-
-} catch (error) {
-
-    logger.warn(`[Notification Service] ${error.message}`);
-
-}
-
-try {
-
-    await sendEmail({
-
-        to: message.email,
-
-        subject: "Reply from SY Digital",
-
-        html: contactReply({
-
-            name: message.name,
-
-            reply: message.adminReply,
-
-        }),
-
-    });
-
-} catch (error) {
-
-    logger.warn(`[Email Service] ${error.message}`);
-
-}
 
 try {
 
@@ -344,21 +317,55 @@ try {
 
 }
 
-try {
+// Notification + client emit are fire-and-forget — never block the reply response
+createNotification({
 
-    const clientUser = await User.findOne({ email: message.email }).select("_id");
+    title: "Message Replied",
 
-    if (clientUser) {
+    message: `Reply sent to ${message.name}.`,
 
-        emitToClient(clientUser._id, "messageReplied", { message });
+    type: "message",
+
+    referenceId: message._id,
+
+    referenceModel: "Message",
+
+}).catch((error) => logger.warn(`[Notification Service] ${error.message}`));
+
+(async () => {
+    try {
+
+        const clientUser = await User.findOne({ email: message.email }).select("_id");
+
+        if (clientUser) {
+
+            emitToClient(clientUser._id, "messageReplied", { message });
+
+        }
+
+    } catch (error) {
+
+        logger.warn(`[Socket.IO] ${error.message}`);
 
     }
+})();
 
-} catch (error) {
+// Send reply email (fire-and-forget — never block the reply or socket events)
+sendEmail({
 
-    logger.warn(`[Socket.IO] ${error.message}`);
+    to: message.email,
 
-}
+    subject: "Reply from SY Digital",
+
+    html: contactReply({
+
+        name: message.name,
+
+        reply: message.adminReply,
+
+    }),
+
+}).catch((error) => logger.warn(`[Email Service] ${error.message}`));
 
 return message;
 

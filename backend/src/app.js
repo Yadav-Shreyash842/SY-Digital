@@ -26,6 +26,9 @@ const aiRoutes = require("./routes/ai.routes");
 const ApiError = require("./utils/ApiError");
 const trackRoutes = require("./routes/track.routes");
 const analyticsRoutes = require("./routes/analytics.routes");
+const settingRoutes = require("./routes/setting.routes");
+const mediaRoutes = require("./routes/media.routes");
+const roleRoutes = require("./routes/role.routes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./docs/swagger");
 
@@ -110,6 +113,9 @@ app.use("/api/notifications", adminLimiter, notificationRoutes);
 app.use("/api/users", adminLimiter, userRoutes);
 app.use("/api/project-requests", adminLimiter, projectRequestRoutes);
 app.use("/api/reviews", adminLimiter, reviewRoutes);
+app.use("/api/settings", adminLimiter, settingRoutes);
+app.use("/api/media", adminLimiter, mediaRoutes);
+app.use("/api/roles", adminLimiter, roleRoutes);
 app.use("/api/client", clientRoutes);
 app.use("/api/ai", aiRoutes);
 

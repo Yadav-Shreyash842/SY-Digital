@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["admin", "client"],
+      enum: ["admin", "manager", "client"],
       default: "client",
     },
 
@@ -51,6 +51,31 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+   emailVerificationToken: {
+    type: String,
+    select: false,
+   },
+
+   emailVerificationExpires: {
+    type: Date,
+    select: false,
+   },
+
+   notificationPrefs: {
+    emailNotifications: {
+        type: Boolean,
+        default: true,
+    },
+    meetingReminders: {
+        type: Boolean,
+        default: true,
+    },
+    paymentAlerts: {
+        type: Boolean,
+        default: true,
+    },
+   },
 
    googleId: {
     type: String,

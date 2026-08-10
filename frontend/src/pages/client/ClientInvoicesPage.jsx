@@ -55,6 +55,53 @@ export default function ClientInvoicesPage() {
     [payments]
   )
 
+  const [downloadingId, setDownloadingId] = useState(null)
+
+  const downloadInvoice = async (row) => {
+    if (downloadingId) return
+    setDownloadingId(row._id || row.id)
+    try {
+      const { default: jsPDF } = await import('jspdf')
+      const { default: autoTable } = await import('jspdf-autotable')
+
+      const doc = new jsPDF()
+      const currency = row.currency || 'INR'
+      const date = row.paidAt || row.createdAt
+        ? new Date(row.paidAt || row.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : '—'
+
+      doc.setFontSize(20)
+      doc.text('Invoice', 14, 22)
+      doc.setFontSize(10)
+      doc.setTextColor(100)
+      doc.text(`Invoice for ${row.clientName || 'Client'}`, 14, 30)
+      doc.text(`Date: ${date}`, 14, 36)
+      doc.text(`Status: ${row.paymentStatus || 'N/A'}`, 14, 42)
+
+      autoTable(doc, {
+        startY: 50,
+        head: [['Description', 'Details']],
+        body: [
+          ['Client', row.clientName || '—'],
+          ['Amount', `${currency} ${Number(row.amount || 0).toLocaleString()}`],
+          ['Payment Method', row.paymentMethod?.replace('-', ' ') || '—'],
+          ['Transaction ID', row.transactionId || '—'],
+          ['Status', row.paymentStatus || '—'],
+        ],
+        styles: { fontSize: 10, cellPadding: 3 },
+        headStyles: { fillColor: [124, 58, 237] },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+      })
+
+      doc.save(`invoice-${row.transactionId || row._id || Date.now()}.pdf`)
+      toast.success('Invoice downloaded')
+    } catch {
+      toast.error('Failed to generate invoice')
+    } finally {
+      setDownloadingId(null)
+    }
+  }
+
   const columns = [
     {
       key: 'clientName',
@@ -100,9 +147,19 @@ export default function ClientInvoicesPage() {
     {
       key: 'action',
       label: '',
-      render: () => (
-        <button type="button" className="rounded-lg p-2 transition hover:bg-white/10" aria-label="Download invoice">
-          <Download strokeWidth={1.75} className="h-4 w-4 text-slate-200" />
+      render: (row) => (
+        <button
+          type="button"
+          onClick={() => downloadInvoice(row)}
+          disabled={!!downloadingId}
+          className="rounded-lg p-2 transition hover:bg-white/10 disabled:opacity-50"
+          aria-label="Download invoice"
+        >
+          {downloadingId === (row._id || row.id) ? (
+            <Loader2 strokeWidth={1.75} className="h-4 w-4 animate-spin text-primary" />
+          ) : (
+            <Download strokeWidth={1.75} className="h-4 w-4 text-slate-200" />
+          )}
         </button>
       ),
     },

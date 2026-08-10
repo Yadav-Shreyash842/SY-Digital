@@ -9,7 +9,9 @@ const { sendEmail } = require("./email.service");
 const welcomeEmail = require("../emails/welcomeEmail");
 const passwordResetEmail = require("../emails/passwordReset");
 const passwordResetSuccessEmail = require("../emails/passwordResetSuccess");
+const emailVerificationEmail = require("../emails/emailVerification");
 const logger = require("../middlewares/logger");
+const { emitToAdmins } = require("../socket/socketEmitter");
 
 // ==============================
 // Register User
@@ -53,6 +55,14 @@ const registerUser = async (userData) => {
         subject: "Welcome to SY Digital",
         html: welcomeEmail(`${user.firstName} ${user.lastName}`),
     }).catch((error) => logger.error(`Welcome email failed: ${error.message}`));
+
+    // Send verification email (fire-and-forget)
+    sendVerificationEmail(user).catch((error) =>
+        logger.error(`Verification email failed: ${error.message}`)
+    );
+
+    // Notify admins (fire-and-forget)
+    emitToAdmins("newUser", { user: user.toJSON() });
 
     return user.toJSON();
 };
@@ -176,7 +186,7 @@ const resetPassword = async (token, newPassword) => {
 // Update Profile
 // ==============================
 const updateProfile = async (userId, updateData) => {
-    const allowedFields = ["firstName", "lastName", "phone", "avatar"];
+    const allowedFields = ["firstName", "lastName", "phone", "avatar", "notificationPrefs"];
     const updates = {};
 
     for (const field of allowedFields) {
@@ -222,6 +232,71 @@ const changePassword = async (userId, currentPassword, newPassword) => {
     return { message: "Password changed successfully" };
 };
 
+// ==============================
+// Send Verification Email
+// ==============================
+const sendVerificationEmail = async (user) => {
+    const token = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    await user.save({ validateModifiedOnly: true });
+
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    const verifyUrl = `${clientUrl}/verify-email?token=${token}&email=${encodeURIComponent(user.email)}`;
+
+    await sendEmail({
+        to: user.email,
+        subject: "Verify Your Email - SY Digital",
+        html: emailVerificationEmail(`${user.firstName} ${user.lastName}`, verifyUrl),
+    });
+
+    return { message: "Verification email sent successfully" };
+};
+
+// ==============================
+// Resend Verification Email
+// ==============================
+const resendVerificationEmail = async (email) => {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (!user) {
+        throw new ApiError(404, "No account found with this email");
+    }
+
+    if (user.isVerified) {
+        throw new ApiError(400, "Email is already verified");
+    }
+
+    return await sendVerificationEmail(user);
+};
+
+// ==============================
+// Verify Email
+// ==============================
+const verifyEmail = async (token) => {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+        emailVerificationToken: hashedToken,
+        emailVerificationExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+        throw new ApiError(400, "Invalid or expired verification token");
+    }
+
+    user.isVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save({ validateModifiedOnly: true });
+
+    return { message: "Email verified successfully" };
+};
+
 module.exports = {
     registerUser,
     loginUser,
@@ -229,4 +304,7 @@ module.exports = {
     resetPassword,
     updateProfile,
     changePassword,
+    sendVerificationEmail,
+    resendVerificationEmail,
+    verifyEmail,
 };

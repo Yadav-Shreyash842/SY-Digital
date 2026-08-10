@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require("../middlewares/auth");
 const authorize = require("../middlewares/authorize");
 const ROLES = require("../constants/roles");
-const { create, createPublic, getAll, getById, updateStatus } = require("../controllers/projectRequest.controller");
+const { createPublic, getAll, getById, updateStatus } = require("../controllers/projectRequest.controller");
 
 // Public route (no auth required)
 router.post("/public", createPublic);

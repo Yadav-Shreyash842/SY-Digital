@@ -23,58 +23,6 @@ const sendAdminAlert = (payload) => {
     );
 };
 
-const create = async (req, res, next) => {
-    try {
-        const { title, description, category, budget, timeline } = req.body;
-
-        if (!title || !description || !category) {
-            throw new ApiError(400, "Title, description, and category are required");
-        }
-
-        const projectRequest = await ProjectRequest.create({
-            clientName: `${req.user.firstName} ${req.user.lastName}`,
-            clientEmail: req.user.email,
-            title,
-            description,
-            category,
-            budget: budget || 0,
-            timeline: timeline || "",
-        });
-
-        try {
-            const { emitToAdmins } = require("../socket/socketEmitter");
-            emitToAdmins("newProjectRequest", { request: projectRequest });
-        } catch (err) {
-            logger.warn(`[Socket.IO] ${err.message}`);
-        }
-
-        try {
-            await createNotification({
-                title: "New Project Request",
-                message: `${projectRequest.clientName} (${projectRequest.clientEmail}) submitted: "${projectRequest.title}"`,
-                type: "project",
-                referenceId: projectRequest._id,
-                referenceModel: "ProjectRequest",
-            });
-        } catch (err) {
-            logger.warn(`[Notification Service] ${err.message}`);
-        }
-
-        sendAdminAlert({
-            leadName: projectRequest.clientName,
-            leadEmail: projectRequest.clientEmail,
-            type: "Project Request",
-            details: `Title: ${projectRequest.title}\nCategory: ${projectRequest.category}\nDescription:\n${projectRequest.description}`,
-        });
-
-        return res.status(201).json(
-            new ApiResponse(201, "Project request submitted successfully", projectRequest)
-        );
-    } catch (error) {
-        next(error);
-    }
-};
-
 const getAll = async (req, res, next) => {
     try {
         const { page = 1, limit = 10, status, search } = req.query;
@@ -290,7 +238,6 @@ const createPublic = async (req, res, next) => {
 };
 
 module.exports = {
-    create,
     createPublic,
     getAll,
     getById,

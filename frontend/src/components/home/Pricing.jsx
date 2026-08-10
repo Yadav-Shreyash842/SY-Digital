@@ -6,16 +6,16 @@ import Button from '../ui/Button'
 const plans = [
   {
     name: 'Starter',
-    price: '$2,499',
-    period: '/month',
+    price: '₹9,999',
+    period: ' One-time project',
     description: 'Perfect for startups launching their digital presence.',
     features: ['5 Page Website', 'Basic SEO Setup', 'Mobile Responsive', 'Email Support', 'Monthly Reports'],
     highlighted: false,
   },
   {
     name: 'Professional',
-    price: '$4,999',
-    period: '/month',
+    price: '₹19,999',
+    period: ' One-time project',
     description: 'For growing businesses ready to scale aggressively.',
     features: ['Custom Web Application', 'Advanced SEO & Analytics', 'UI/UX Design System', 'Priority Support', 'Weekly Strategy Calls', 'Client Dashboard Access'],
     highlighted: true,

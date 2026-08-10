@@ -40,7 +40,7 @@ const auth = async (req, res, next) => {
         );
 
         // Find User
-        const user = await User.findById(decoded.id).select("-password");
+        const user = await User.findById(decoded.id).select("-password").lean();
 
         if (!user) {
             throw new ApiError(

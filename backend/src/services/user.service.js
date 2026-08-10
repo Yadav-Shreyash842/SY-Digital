@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const User = require("../models/User");
 const ApiError = require("../utils/ApiError");
+const { emitToAdmins } = require("../socket/socketEmitter");
 
 const USER_SELECT = "firstName lastName email phone avatar role isVerified createdAt updatedAt";
 const MAX_LIMIT = 100;
@@ -180,6 +181,8 @@ const updateUser = async (userId, updateData) => {
 		throw new ApiError(404, "User not found");
 	}
 
+	emitToAdmins("userUpdated", { user });
+
 	return user;
 };
 
@@ -194,6 +197,8 @@ const deleteUser = async (userId) => {
 	if (!user) {
 		throw new ApiError(404, "User not found");
 	}
+
+	emitToAdmins("userDeleted", { userId });
 
 	return user;
 };

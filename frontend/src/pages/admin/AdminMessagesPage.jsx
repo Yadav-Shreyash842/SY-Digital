@@ -76,7 +76,17 @@ function buildMessageFeed(msg) {
 
   replies.forEach(r => feed.push(r))
 
-  if (msg.adminReply) {
+  const adminReplies = (msg.adminReplies || []).map((r, i) => ({
+    id: msg._id + '_admin_' + i + (r._id || ''),
+    text: r.text,
+    time: r.createdAt || msg.repliedAt || msg.updatedAt || msg.createdAt,
+    sender: 'admin',
+    senderName: 'Admin',
+  }))
+
+  if (adminReplies.length > 0) {
+    adminReplies.forEach(r => feed.push(r))
+  } else if (msg.adminReply) {
     feed.push({
       id: msg._id + '_admin',
       text: msg.adminReply,
@@ -142,6 +152,8 @@ export default function AdminMessagesPage() {
       setSelectedDetail(res?.data || null)
       if (res?.data?.status === 'unread') {
         await messageService.updateStatus(id, 'read')
+        setSelectedDetail(prev => prev ? { ...prev, status: 'read' } : prev)
+        setMessages(prev => prev.map(m => m._id === id ? { ...m, status: 'read' } : m))
       }
     } catch {
       toast.error('Failed to load message')
@@ -190,13 +202,28 @@ export default function AdminMessagesPage() {
         if (selectedId) fetchDetail(selectedId)
       }
     }
+    const onMessageChanged = (data) => {
+      if (data?.message) {
+        setMessages(prev => mergeMessages(prev, [data.message]))
+        if (selectedId === data.message._id) {
+          setSelectedDetail(data.message)
+        }
+      } else {
+        fetchMessages()
+        if (selectedId) fetchDetail(selectedId)
+      }
+    }
     socket.on('newMessage', onNewMessage)
     socket.on('clientReplied', onClientReplied)
     socket.on('messageReplied', onMessageReplied)
+    socket.on('messageStatusUpdated', onMessageChanged)
+    socket.on('messageDeleted', onMessageChanged)
     return () => {
       socket.off('newMessage', onNewMessage)
       socket.off('clientReplied', onClientReplied)
       socket.off('messageReplied', onMessageReplied)
+      socket.off('messageStatusUpdated', onMessageChanged)
+      socket.off('messageDeleted', onMessageChanged)
     }
   }, [connect, fetchMessages, selectedId, fetchDetail])
 
@@ -226,6 +253,15 @@ export default function AdminMessagesPage() {
     setSending(true)
     const sentText = replyText.trim()
     setReplyText('')
+
+    const optimistic = { text: sentText, createdAt: new Date().toISOString(), _temp: true }
+    setSelectedDetail(prev => prev ? { ...prev, adminReplies: [...(prev.adminReplies || []), optimistic] } : prev)
+    setMessages(prev => prev.map(m =>
+      m._id === selectedDetail._id
+        ? { ...m, adminReplies: [...(m.adminReplies || []), optimistic] }
+        : m
+    ))
+
     try {
       const res = await messageService.reply(selectedDetail._id, sentText)
       toast.success('Reply sent')
@@ -234,11 +270,11 @@ export default function AdminMessagesPage() {
         setMessages(prev => mergeMessages(prev, [res.data]))
       }
       setSending(false)
-      fetchDetail(selectedDetail._id)
-      fetchMessages()
     } catch {
       toast.error('Failed to send reply')
       setSending(false)
+      fetchDetail(selectedDetail._id)
+      fetchMessages()
     }
   }
 

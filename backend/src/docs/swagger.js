@@ -36,7 +36,15 @@ const options = {
             { name: "Messages", description: "Contact message management" },
             { name: "Notifications", description: "Notification management" },
             { name: "Dashboard", description: "Admin dashboard analytics" },
+            { name: "Analytics", description: "Visitor analytics" },
             { name: "Upload", description: "File upload endpoints" },
+            { name: "Media", description: "Media library" },
+            { name: "Settings", description: "Platform settings" },
+            { name: "Roles", description: "System roles" },
+            { name: "Project Requests", description: "Project request management" },
+            { name: "Client Portal", description: "Client-facing endpoints" },
+            { name: "AI", description: "AI chatbot" },
+            { name: "Tracking", description: "Analytics tracking" },
             { name: "Health", description: "Health check" },
         ],
         paths: {
@@ -581,6 +589,275 @@ const options = {
                         },
                     },
                     responses: { 200: { description: "Video uploaded" } },
+                },
+            },
+            "/api/auth/send-verification": {
+                post: {
+                    tags: ["Auth"],
+                    summary: "Resend email verification link",
+                    security: [],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    required: ["email"],
+                                    properties: { email: { type: "string", format: "email" } },
+                                },
+                            },
+                        },
+                    },
+                    responses: {
+                        200: { description: "Verification email sent" },
+                        404: { description: "No account found with this email" },
+                    },
+                },
+            },
+            "/api/auth/verify-email": {
+                post: {
+                    tags: ["Auth"],
+                    summary: "Verify email with token",
+                    security: [],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    required: ["token"],
+                                    properties: { token: { type: "string" } },
+                                },
+                            },
+                        },
+                    },
+                    responses: {
+                        200: { description: "Email verified successfully" },
+                        400: { description: "Invalid or expired verification token" },
+                    },
+                },
+            },
+            "/api/admin/analytics/visitor-stats": {
+                get: {
+                    tags: ["Analytics"],
+                    summary: "Visitor stats including conversion and bounce rates (Admin)",
+                    parameters: [{ name: "range", in: "query", schema: { type: "string", enum: ["today", "7d", "30d", "90d", "12m"], default: "30d" } }],
+                    responses: { 200: { description: "Stats fetched" } },
+                },
+            },
+            "/api/admin/analytics/traffic": {
+                get: {
+                    tags: ["Analytics"],
+                    summary: "Traffic chart data (Admin)",
+                    parameters: [{ name: "range", in: "query", schema: { type: "string", enum: ["today", "7d", "30d", "90d", "12m"], default: "30d" } }],
+                    responses: { 200: { description: "Traffic data fetched" } },
+                },
+            },
+            "/api/project-requests/public": {
+                post: {
+                    tags: ["Project Requests"],
+                    summary: "Submit a public project request",
+                    security: [],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    required: ["name", "email", "projectType", "description"],
+                                    properties: {
+                                        name: { type: "string" },
+                                        email: { type: "string", format: "email" },
+                                        phone: { type: "string" },
+                                        company: { type: "string" },
+                                        projectType: { type: "string" },
+                                        budget: { type: "string" },
+                                        timeline: { type: "string" },
+                                        description: { type: "string" },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    responses: { 201: { description: "Project request submitted" } },
+                },
+            },
+            "/api/project-requests": {
+                get: {
+                    tags: ["Project Requests"],
+                    summary: "Get all project requests (Admin)",
+                    parameters: [
+                        { name: "page", in: "query", schema: { type: "integer" } },
+                        { name: "limit", in: "query", schema: { type: "integer" } },
+                        { name: "status", in: "query", schema: { type: "string", enum: ["pending", "reviewing", "approved", "rejected"] } },
+                        { name: "search", in: "query", schema: { type: "string" } },
+                    ],
+                    responses: { 200: { description: "Project requests fetched" } },
+                },
+            },
+            "/api/project-requests/{id}/status": {
+                patch: {
+                    tags: ["Project Requests"],
+                    summary: "Update project request status (Admin)",
+                    parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+                    responses: { 200: { description: "Status updated" } },
+                },
+            },
+            "/api/settings": {
+                get: {
+                    tags: ["Settings"],
+                    summary: "Get platform settings (Admin)",
+                    responses: { 200: { description: "Settings fetched" } },
+                },
+                patch: {
+                    tags: ["Settings"],
+                    summary: "Update platform settings (Admin)",
+                    requestBody: {
+                        required: true,
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        agencyName: { type: "string" },
+                                        supportEmail: { type: "string", format: "email" },
+                                        websiteUrl: { type: "string" },
+                                        pushNotifications: { type: "boolean" },
+                                        emailNotifications: { type: "boolean" },
+                                        marketingEmails: { type: "boolean" },
+                                        sessionTimeout: { type: "integer" },
+                                        twoFactor: { type: "boolean" },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    responses: { 200: { description: "Settings updated" } },
+                },
+            },
+            "/api/media": {
+                get: {
+                    tags: ["Media"],
+                    summary: "Get all media (Admin)",
+                    parameters: [
+                        { name: "page", in: "query", schema: { type: "integer" } },
+                        { name: "limit", in: "query", schema: { type: "integer" } },
+                        { name: "type", in: "query", schema: { type: "string", enum: ["image", "video", "document"] } },
+                        { name: "search", in: "query", schema: { type: "string" } },
+                    ],
+                    responses: { 200: { description: "Media fetched" } },
+                },
+            },
+            "/api/media/{id}": {
+                delete: {
+                    tags: ["Media"],
+                    summary: "Delete media (Admin)",
+                    parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+                    responses: { 200: { description: "Media deleted" }, 404: { description: "Not found" } },
+                },
+            },
+            "/api/roles": {
+                get: {
+                    tags: ["Roles"],
+                    summary: "Get system roles with live user counts (Admin)",
+                    responses: { 200: { description: "Roles fetched" } },
+                },
+            },
+            "/api/client/dashboard": {
+                get: {
+                    tags: ["Client Portal"],
+                    summary: "Client dashboard data",
+                    responses: { 200: { description: "Dashboard fetched" } },
+                },
+            },
+            "/api/client/meetings": {
+                get: {
+                    tags: ["Client Portal"],
+                    summary: "Get client's own meetings",
+                    responses: { 200: { description: "Meetings fetched" } },
+                },
+            },
+            "/api/client/messages": {
+                get: {
+                    tags: ["Client Portal"],
+                    summary: "Get client's own messages",
+                    responses: { 200: { description: "Messages fetched" } },
+                },
+                post: {
+                    tags: ["Client Portal"],
+                    summary: "Send a message as client",
+                    responses: { 201: { description: "Message sent" } },
+                },
+            },
+            "/api/client/payments": {
+                get: {
+                    tags: ["Client Portal"],
+                    summary: "Get client's own payments",
+                    responses: { 200: { description: "Payments fetched" } },
+                },
+            },
+            "/api/client/projects": {
+                get: {
+                    tags: ["Client Portal"],
+                    summary: "Get client's own projects",
+                    responses: { 200: { description: "Projects fetched" } },
+                },
+            },
+            "/api/client/project-requests": {
+                get: {
+                    tags: ["Client Portal"],
+                    summary: "Get client's own project requests",
+                    responses: { 200: { description: "Requests fetched" } },
+                },
+                post: {
+                    tags: ["Client Portal"],
+                    summary: "Submit a project request as client",
+                    responses: { 201: { description: "Request submitted" } },
+                },
+            },
+            "/api/ai/chat": {
+                post: {
+                    tags: ["AI"],
+                    summary: "Chat with the AI assistant",
+                    security: [],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    required: ["message"],
+                                    properties: { message: { type: "string" }, history: { type: "array" } },
+                                },
+                            },
+                        },
+                    },
+                    responses: { 200: { description: "AI response" } },
+                },
+            },
+            "/api/track/page-view": {
+                post: {
+                    tags: ["Tracking"],
+                    summary: "Track a page view",
+                    security: [],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    required: ["path", "sessionId"],
+                                    properties: {
+                                        path: { type: "string" },
+                                        sessionId: { type: "string" },
+                                        referrer: { type: "string" },
+                                        pageTitle: { type: "string" },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    responses: { 200: { description: "Page view tracked" } },
                 },
             },
         },

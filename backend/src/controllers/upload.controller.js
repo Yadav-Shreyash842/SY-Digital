@@ -7,7 +7,10 @@ const ApiResponse = require("../utils/ApiResponse");
 const uploadImage = async (req, res, next) => {
 
     try {
-        const result = await uploadImageService(req.file);
+        const result = await uploadImageService(req.file, {
+            originalName: req.file?.originalname || "",
+            createdBy: req.user?._id || null,
+        });
 
         return res.status(201).json(
             new ApiResponse(
@@ -35,7 +38,10 @@ const uploadVideo = async (
     try {
 
         const result =
-            await uploadVideoService(req.file);
+            await uploadVideoService(req.file, {
+                originalName: req.file?.originalname || "",
+                createdBy: req.user?._id || null,
+            });
 
         return res.status(201).json(
 

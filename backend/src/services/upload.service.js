@@ -1,4 +1,5 @@
 const cloudinary = require("../config/cloudinary");
+const Media = require("../models/Media");
 const ApiError = require("../utils/ApiError");
 const logger = require("../middlewares/logger");
 
@@ -16,9 +17,33 @@ const toDataUri = (file) => {
     return `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
 };
 
+const saveMediaRecord = async ({ result, type, originalName, createdBy }) => {
+    try {
+        const media = await Media.create({
+            publicId: result.publicId,
+            url: result.url,
+            originalName: originalName || "",
+            type,
+            format: result.format || "",
+            bytes: result.bytes || 0,
+            width: result.width || 0,
+            height: result.height || 0,
+            duration: result.duration || 0,
+            createdBy,
+        });
+
+        result._id = media._id;
+        result.mediaId = media._id;
+    } catch (error) {
+        logger.warn(`[Media] Failed to save media record: ${error.message}`);
+    }
+
+    return result;
+};
+
 // ─── Service Functions ────────────────────────────────────────────────────────
 
-const uploadImageService = async (file) => {
+const uploadImageService = async (file, meta = {}) => {
     if (!file) {
         throw new ApiError(400, "Image file is required.");
     }
@@ -29,7 +54,7 @@ const uploadImageService = async (file) => {
             resource_type: "image",
         });
 
-        return {
+        const payload = {
             publicId: result.public_id,
             url: result.secure_url,
             width: result.width,
@@ -37,6 +62,13 @@ const uploadImageService = async (file) => {
             format: result.format,
             bytes: result.bytes,
         };
+
+        return await saveMediaRecord({
+            result: payload,
+            type: "image",
+            originalName: meta.originalName,
+            createdBy: meta.createdBy,
+        });
 
     } catch (error) {
         // Re-throw ApiError from toDataUri as-is
@@ -49,7 +81,7 @@ const uploadImageService = async (file) => {
 
 const uploadVideoService = async (
     file,
-    folder = "sy-digital/videos"
+    meta = {}
 ) => {
     if (!file) {
         throw new ApiError(400, "Video file is required.");
@@ -57,17 +89,24 @@ const uploadVideoService = async (
 
     try {
         const result = await cloudinary.uploader.upload(toDataUri(file), {
-            folder,
+            folder: "sy-digital/videos",
             resource_type: "video",
         });
 
-        return {
+        const payload = {
             publicId: result.public_id,
             url: result.secure_url,
             duration: result.duration,
             format: result.format,
             bytes: result.bytes,
         };
+
+        return await saveMediaRecord({
+            result: payload,
+            type: "video",
+            originalName: meta.originalName,
+            createdBy: meta.createdBy,
+        });
 
     } catch (error) {
         // Re-throw ApiError from toDataUri as-is

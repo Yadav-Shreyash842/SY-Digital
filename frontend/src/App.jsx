@@ -46,6 +46,7 @@ import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
+import EmailVerificationPage from './pages/auth/EmailVerificationPage'
 import ProtectedRoute from './routes/ProtectedRoute'
 import RoleRoute from './routes/RoleRoute'
 import Unauthorized from './components/errors/Unauthorized'
@@ -79,6 +80,7 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify-email" element={<EmailVerificationPage />} />
         </Route>
 
         <Route element={<ProtectedRoute />}>

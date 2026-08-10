@@ -67,7 +67,17 @@ function buildMessageFeed(msg) {
 
   replies.forEach(r => feed.push(r))
 
-  if (msg.adminReply) {
+  const adminReplies = (msg.adminReplies || []).map((r, i) => ({
+    id: msg._id + '_admin_' + i + (r._id || ''),
+    text: r.text,
+    time: r.createdAt || msg.repliedAt || msg.updatedAt || msg.createdAt,
+    sender: 'admin',
+    senderName: 'Team',
+  }))
+
+  if (adminReplies.length > 0) {
+    adminReplies.forEach(r => feed.push(r))
+  } else if (msg.adminReply) {
     feed.push({
       id: msg._id + '_admin',
       text: msg.adminReply,
@@ -145,7 +155,8 @@ export default function MessagesPage() {
       }
     }
     socket.on('messageReplied', handleUpdate)
-    return () => { socket.off('messageReplied', handleUpdate) }
+    socket.on('messageStatusUpdated', handleUpdate)
+    return () => { socket.off('messageReplied', handleUpdate); socket.off('messageStatusUpdated', handleUpdate) }
   }, [connect, fetchClientMessages])
 
   useEffect(() => {
@@ -198,7 +209,6 @@ export default function MessagesPage() {
       if (res?.data) {
         setMessages(prev => mergeMessages(prev, [res.data]))
       }
-      await fetchClientMessages()
     } catch {
       toast.error('Failed to send reply')
     } finally {
@@ -303,7 +313,7 @@ export default function MessagesPage() {
           {unreadCount > 0 && (
             <span className="inline-flex items-center gap-2 rounded-full border border-warning/20 bg-warning/10 px-4 py-2 text-sm font-semibold text-warning">
               <span className="h-2 w-2 rounded-full bg-warning animate-pulse" />
-              {unreadCount} unread
+              {unreadCount} pending
             </span>
           )}
           <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold ${
@@ -421,7 +431,7 @@ export default function MessagesPage() {
                     selected.status === 'replied' ? 'border-success/20 bg-success/10 text-success' :
                     'border-white/10 bg-white/10 text-slate-300'
                   }`}>
-                    {selected.status}
+                    {selected.status === 'unread' ? 'Pending' : selected.status}
                   </span>
                 </div>
 

@@ -30,8 +30,8 @@ export default function RegisterPage() {
         email: data.email,
         password: data.password,
       })
-      toast.success('Account created successfully!')
-      navigate('/login')
+      toast.success('Account created successfully! Check your inbox to verify your email.')
+      navigate(`/verify-email?email=${encodeURIComponent(data.email)}`)
     } catch (error) {
       toast.error(error?.response?.data?.message || error?.message || 'Registration failed')
     } finally {

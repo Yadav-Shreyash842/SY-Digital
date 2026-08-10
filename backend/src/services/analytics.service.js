@@ -1,4 +1,6 @@
 const PageView = require("../models/PageView");
+const Message = require("../models/Message");
+const ProjectRequest = require("../models/ProjectRequest");
 
 function getDateRange(range) {
   const now = new Date();
@@ -21,7 +23,7 @@ function getDateRange(range) {
 const getVisitorStats = async (range = "30d") => {
   const start = getDateRange(range);
 
-  const [pageViews, uniqueVisitors, todayViews, todayVisitors] = await Promise.all([
+  const [pageViews, uniqueVisitors, todayViews, todayVisitors, leads, bouncers, sessions] = await Promise.all([
     PageView.countDocuments({ createdAt: { $gte: start } }),
     PageView.distinct("sessionId", { createdAt: { $gte: start } }),
     PageView.countDocuments({
@@ -30,40 +32,109 @@ const getVisitorStats = async (range = "30d") => {
     PageView.distinct("sessionId", {
       createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) },
     }),
+    Promise.all([
+      Message.countDocuments({ createdAt: { $gte: start } }),
+      ProjectRequest.countDocuments({ createdAt: { $gte: start } }),
+    ]),
+    PageView.aggregate([
+      { $match: { createdAt: { $gte: start } } },
+      { $group: { _id: "$sessionId", views: { $sum: 1 } } },
+      { $match: { views: { $eq: 1 } } },
+      { $count: "count" },
+    ]),
+    PageView.aggregate([
+      { $match: { createdAt: { $gte: start } } },
+      { $group: { _id: "$sessionId", count: { $sum: 1 } } },
+    ]),
   ]);
+
+  const totalSessions = sessions?.length || 0;
+  const uniqueVisitorCount = uniqueVisitors?.length || 0;
+  const leadCount = (leads?.[0] || 0) + (leads?.[1] || 0);
+  const singleViewSessions = bouncers?.[0]?.count || 0;
 
   return {
     pageViews: pageViews || 0,
-    uniqueVisitors: uniqueVisitors?.length || 0,
+    uniqueVisitors: uniqueVisitorCount,
     todayPageViews: todayViews || 0,
     todayUniqueVisitors: todayVisitors?.length || 0,
+    conversionRate: uniqueVisitorCount > 0 ? Number(((leadCount / uniqueVisitorCount) * 100).toFixed(1)) : 0,
+    bounceRate: totalSessions > 0 ? Number(((singleViewSessions / totalSessions) * 100).toFixed(1)) : 0,
+    totalLeads: leadCount,
   };
 };
 
 const getTraffic = async (range = "30d") => {
   const start = getDateRange(range);
 
-  const data = await PageView.aggregate([
-    { $match: { createdAt: { $gte: start } } },
-    {
-      $group: {
-        _id: {
-          year: { $year: "$createdAt" },
-          month: { $month: "$createdAt" },
-          day: { $dayOfMonth: "$createdAt" },
+  const [views, leads] = await Promise.all([
+    PageView.aggregate([
+      { $match: { createdAt: { $gte: start } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+            day: { $dayOfMonth: "$createdAt" },
+          },
+          views: { $sum: 1 },
+          uniqueSessions: { $addToSet: "$sessionId" },
         },
-        views: { $sum: 1 },
-        uniqueSessions: { $addToSet: "$sessionId" },
       },
-    },
-    { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
+      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
+    ]),
+    (async () => {
+      const [messages, projectRequests] = await Promise.all([
+        Message.aggregate([
+          { $match: { createdAt: { $gte: start } } },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" },
+                day: { $dayOfMonth: "$createdAt" },
+              },
+              count: { $sum: 1 },
+            },
+          },
+        ]),
+        ProjectRequest.aggregate([
+          { $match: { createdAt: { $gte: start } } },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" },
+                day: { $dayOfMonth: "$createdAt" },
+              },
+              count: { $sum: 1 },
+            },
+          },
+        ]),
+      ]);
+
+      const map = new Map();
+      for (const item of messages) {
+        const key = `${item._id.year}-${item._id.month}-${item._id.day}`;
+        map.set(key, (map.get(key) || 0) + item.count);
+      }
+      for (const item of projectRequests) {
+        const key = `${item._id.year}-${item._id.month}-${item._id.day}`;
+        map.set(key, (map.get(key) || 0) + item.count);
+      }
+      return map;
+    })(),
   ]);
 
-  return data.map((d) => ({
-    date: `${d._id.year}-${String(d._id.month).padStart(2, "0")}-${String(d._id.day).padStart(2, "0")}`,
-    views: d.views,
-    uniqueVisitors: d.uniqueSessions?.length || 0,
-  }));
+  return views.map((d) => {
+    const key = `${d._id.year}-${d._id.month}-${d._id.day}`;
+    return {
+      date: `${d._id.year}-${String(d._id.month).padStart(2, "0")}-${String(d._id.day).padStart(2, "0")}`,
+      views: d.views,
+      uniqueVisitors: d.uniqueSessions?.length || 0,
+      conversions: leads.get(key) || 0,
+    };
+  });
 };
 
 module.exports = {

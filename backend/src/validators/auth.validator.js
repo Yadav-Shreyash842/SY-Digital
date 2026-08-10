@@ -118,6 +118,23 @@ const changePasswordValidator = [
         .withMessage("Password must contain at least one number"),
 ];
 
+const sendVerificationValidator = [
+    body("email")
+        .trim()
+        .notEmpty()
+        .withMessage("Email is required")
+        .isEmail()
+        .withMessage("Please provide a valid email")
+        .normalizeEmail(),
+];
+
+const verifyEmailValidator = [
+    body("token")
+        .trim()
+        .notEmpty()
+        .withMessage("Verification token is required"),
+];
+
 module.exports = {
 
     registerValidator,
@@ -131,5 +148,9 @@ module.exports = {
     updateProfileValidator,
 
     changePasswordValidator,
+
+    sendVerificationValidator,
+
+    verifyEmailValidator,
 
 };

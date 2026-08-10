@@ -155,6 +155,7 @@ router.patch("/messages/:id/reply", async (req, res, next) => {
         }
 
         message.clientReplies.push({ text: req.body.text });
+        message.status = "unread";
         await message.save();
         await message.populate("service", "title");
 

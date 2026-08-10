@@ -10,6 +10,7 @@ import Input from '../../components/ui/Input'
 import Textarea from '../../components/ui/Textarea'
 import Select from '../../components/ui/Select'
 import paymentService from '../../services/payment.service'
+import useSocket from '../../hooks/useSocket'
 
 const currencyOptions = [
   { value: 'INR', label: 'INR' },
@@ -149,6 +150,8 @@ const emptyForm = {
 }
 
 export default function AdminPaymentsPage() {
+  const { connect } = useSocket()
+
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -201,6 +204,18 @@ export default function AdminPaymentsPage() {
   useEffect(() => { fetchData() }, [fetchData])
   useEffect(() => { fetchStats() }, [fetchStats])
   useEffect(() => { setPage(1) }, [search, statusFilter, methodFilter, currencyFilter])
+
+  useEffect(() => {
+    const socket = connect()
+    if (!socket) return
+    const refresh = () => { fetchData(); fetchStats() }
+    socket.on('newPayment', refresh)
+    socket.on('paymentStatusUpdated', refresh)
+    return () => {
+      socket.off('newPayment', refresh)
+      socket.off('paymentStatusUpdated', refresh)
+    }
+  }, [connect, fetchData, fetchStats])
 
   const validateForm = () => {
     const e = {}

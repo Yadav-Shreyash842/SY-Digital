@@ -143,12 +143,32 @@ function ProfilePanel() {
 }
 
 function SettingsPanel() {
-  const [emailNotifications, setEmailNotifications] = useState(true)
-  const [meetingReminders, setMeetingReminders] = useState(true)
-  const [paymentAlerts, setPaymentAlerts] = useState(true)
+  const { user, setUser } = useAuth()
+  const prefs = user?.notificationPrefs || {}
+  const [emailNotifications, setEmailNotifications] = useState(prefs.emailNotifications !== false)
+  const [meetingReminders, setMeetingReminders] = useState(prefs.meetingReminders !== false)
+  const [paymentAlerts, setPaymentAlerts] = useState(prefs.paymentAlerts !== false)
+  const [saving, setSaving] = useState(false)
 
-  const handleSave = () => {
-    toast.success('Settings saved')
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const updated = await authService.updateProfile({
+        notificationPrefs: {
+          emailNotifications,
+          meetingReminders,
+          paymentAlerts,
+        },
+      })
+      if (updated) {
+        setUser(updated)
+        toast.success('Preferences saved')
+      }
+    } catch {
+      toast.error('Failed to save preferences')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -225,9 +245,10 @@ function SettingsPanel() {
           <button
             type="button"
             onClick={handleSave}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
           >
-            <Save strokeWidth={1.75} className="h-4 w-4" />
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save strokeWidth={1.75} className="h-4 w-4" />}
             Save preferences
           </button>
         </div>
