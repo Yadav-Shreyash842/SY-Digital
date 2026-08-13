@@ -32,6 +32,7 @@ export default function AdminNotificationsPage() {
   const [actionLoading, setActionLoading] = useState(false)
 
   const [statsData, setStatsData] = useState({ total: 0, read: 0, unread: 0 })
+  const [typeData, setTypeData] = useState([])
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -69,14 +70,30 @@ export default function AdminNotificationsPage() {
     }
   }, [])
 
+  const fetchTypeAnalytics = useCallback(async () => {
+    try {
+      const res = await notificationService.typeAnalytics()
+      const list = res?.data || []
+      setTypeData(
+        list.map((d) => ({
+          name: d.type?.charAt(0).toUpperCase() + d.type?.slice(1),
+          value: d.total,
+        }))
+      )
+    } catch {
+      // silent
+    }
+  }, [])
+
   useEffect(() => { fetchData() }, [fetchData])
   useEffect(() => { fetchStats() }, [fetchStats])
+  useEffect(() => { fetchTypeAnalytics() }, [fetchTypeAnalytics])
   useEffect(() => { setPage(1) }, [search, typeFilter, readFilter])
 
   useEffect(() => {
     const socket = connect()
     if (!socket) return
-    const handleNew = () => { fetchData(); fetchStats() }
+    const handleNew = () => { fetchData(); fetchStats(); fetchTypeAnalytics() }
     socket.on('newNotification', handleNew)
     socket.on('allNotificationsRead', handleNew)
     socket.on('notificationDeleted', handleNew)
@@ -85,16 +102,20 @@ export default function AdminNotificationsPage() {
       socket.off('allNotificationsRead', handleNew)
       socket.off('notificationDeleted', handleNew)
     }
-  }, [connect, fetchData, fetchStats])
+    }, [connect, fetchData, fetchStats, fetchTypeAnalytics])
 
-  const typeDistribution = useMemo(() => {
-    const map = {}
-    data.forEach((n) => {
-      const t = n.type || 'other'
-      map[t] = (map[t] || 0) + 1
-    })
-    return Object.entries(map).map(([name, value]) => ({ name, value }))
-  }, [data])
+  const typeDistribution = useMemo(() => typeData, [typeData])
+
+  useEffect(() => {
+    if (!selectedNotification?._id) return
+    let active = true
+    notificationService.get(selectedNotification._id)
+      .then((res) => {
+        if (active && res?.data) setSelectedNotification(res.data)
+      })
+      .catch(() => {})
+    return () => { active = false }
+  }, [selectedNotification?._id])
 
   const handleMarkRead = async (row) => {
     if (row.isRead) return
@@ -145,6 +166,7 @@ export default function AdminNotificationsPage() {
       setSelected(null)
       fetchData()
       fetchStats()
+      fetchTypeAnalytics()
     } catch {
       toast.error('Failed to delete notification')
     } finally {

@@ -34,6 +34,10 @@ const initializeSocket = (server) => {
                     return callback(null, true);
                 }
 
+                if (process.env.NODE_ENV !== "production" && /^https?:\/\/(\d{1,3}\.){3}\d{1,3}(:\d+)?$/.test(origin)) {
+                    return callback(null, true);
+                }
+
                 callback(new Error("Not allowed by CORS"));
             },
             methods: ["GET", "POST"],

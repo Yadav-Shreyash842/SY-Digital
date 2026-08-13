@@ -25,6 +25,10 @@ export const paymentService = {
     const res = await apiClient.get('/api/payments/dashboard/monthly-analytics')
     return res?.data
   },
+  statusAnalytics: async () => {
+    const res = await apiClient.get('/api/payments/dashboard/status-analytics')
+    return res?.data
+  },
 }
 
 export default paymentService

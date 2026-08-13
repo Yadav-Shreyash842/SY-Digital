@@ -51,13 +51,16 @@ export default function AdminMediaPage() {
   const handleFile = async (file) => {
     setUploading(true)
     setUploadProgress(0)
+    const isVideo = (file.type || '').startsWith('video/')
     try {
-      const res = await uploadService.uploadImage(file, setUploadProgress)
+      const res = isVideo
+        ? await uploadService.uploadVideo(file, setUploadProgress)
+        : await uploadService.uploadImage(file, setUploadProgress)
       const data = res?.data || res || {}
       const newItem = {
         _id: data.mediaId || data._id || Date.now(),
         originalName: file.name,
-        type: 'image',
+        type: isVideo ? 'video' : 'image',
         bytes: data.bytes || file.size,
         url: data.url || '',
       }
@@ -120,8 +123,8 @@ export default function AdminMediaPage() {
       {showUpload && (
         <div className="rounded-card border border-border bg-card-bg p-6 shadow-sm">
           <FileDropZone
-            accept="image/*"
-            label="Upload Image"
+            accept="image/*,video/*"
+            label="Upload Image or Video"
             uploading={uploading}
             uploadProgress={uploadProgress}
             onFile={handleFile}

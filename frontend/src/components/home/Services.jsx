@@ -1,9 +1,11 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Code2, Palette, Megaphone, ArrowUpRight } from 'lucide-react'
 import SectionContainer from '../ui/SectionContainer'
+import serviceService from '../../services/service.service'
 
-const services = [
+const fallbackServices = [
   {
     icon: Code2,
     title: 'Web Development',
@@ -27,7 +29,45 @@ const services = [
   },
 ]
 
+const categoryIcons = {
+  'web development': Code2,
+  'ui/ux design': Palette,
+  'digital marketing': Megaphone,
+  web: Code2,
+  design: Palette,
+  marketing: Megaphone,
+}
+
+const categoryIcon = (category) => {
+  const key = String(category || '').toLowerCase()
+  return categoryIcons[key] || Code2
+}
+
 export default function Services() {
+  const [services, setServices] = useState(fallbackServices)
+
+  useEffect(() => {
+    let active = true
+    serviceService.featured()
+      .then((res) => {
+        if (!active) return
+        const list = res?.data || []
+        if (list.length) {
+          setServices(
+            list.map((s) => ({
+              icon: categoryIcon(s.category),
+              title: s.title,
+              slug: s.slug,
+              description: s.shortDescription || s.description || '',
+              tags: Array.isArray(s.technologies) ? s.technologies.slice(0, 3) : [],
+            }))
+          )
+        }
+      })
+      .catch(() => {})
+    return () => { active = false }
+  }, [])
+
   return (
     <SectionContainer id="services">
       <motion.div
@@ -52,7 +92,7 @@ export default function Services() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
         {services.map((service, i) => (
           <motion.div
-            key={service.title}
+            key={service._id || service.slug || `${service.title}-${i}`}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -64,16 +104,18 @@ export default function Services() {
             </div>
             <h3 className="mb-3 text-xl font-bold">{service.title}</h3>
             <p className="mb-6 text-base leading-[160%] text-text-secondary">{service.description}</p>
-            <div className="mb-6 flex flex-wrap gap-2">
-              {service.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm px-3 py-1 text-xs font-medium text-text-secondary"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+            {service.tags.length > 0 && (
+              <div className="mb-6 flex flex-wrap gap-2">
+                {service.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm px-3 py-1 text-xs font-medium text-text-secondary"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
             <Link
               to={`/services/${service.slug}`}
               className="inline-flex items-center gap-1 text-sm font-semibold text-accent-purple transition-all duration-300 group-hover:gap-3"

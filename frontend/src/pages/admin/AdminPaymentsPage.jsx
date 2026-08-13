@@ -1,5 +1,18 @@
 import { useState, useEffect, useCallback } from 'react'
-import { DollarSign, CreditCard, Clock, CheckCircle, Eye, Pencil, Ban, RefreshCw } from 'lucide-react'
+import { DollarSign, CreditCard, Clock, CheckCircle, Eye, Pencil, Ban, RefreshCw, Loader2 } from 'lucide-react'
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  CartesianGrid,
+} from 'recharts'
 import toast from 'react-hot-toast'
 import AdminListPage from '../../components/dashboard/AdminListPage'
 import Badge from '../../components/ui/Badge'
@@ -74,6 +87,15 @@ const formatDate = (dateStr) => {
     day: 'numeric',
     year: 'numeric',
   })
+}
+
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+const statusChartColors = {
+  pending: '#f59e0b',
+  paid: '#22c55e',
+  failed: '#ef4444',
+  refunded: '#3b82f6',
 }
 
 const columns = [
@@ -163,6 +185,9 @@ export default function AdminPaymentsPage() {
   const [total, setTotal] = useState(0)
   const [stats, setStats] = useState(null)
   const [meetings, setMeetings] = useState([])
+  const [statusData, setStatusData] = useState([])
+  const [monthlyData, setMonthlyData] = useState([])
+  const [chartsLoading, setChartsLoading] = useState(true)
 
   const [showCreate, setShowCreate] = useState(false)
   const [showView, setShowView] = useState(false)
@@ -201,21 +226,58 @@ export default function AdminPaymentsPage() {
     }
   }, [])
 
+  const fetchCharts = useCallback(async () => {
+    setChartsLoading(true)
+    try {
+      const [statusRes, monthlyRes] = await Promise.all([
+        paymentService.statusAnalytics(),
+        paymentService.monthlyAnalytics(),
+      ])
+      const statusList = statusRes?.data || []
+      setStatusData(
+        statusList.map((d) => ({
+          name: d.status?.charAt(0).toUpperCase() + d.status?.slice(1),
+          value: d.total,
+          status: d.status,
+        }))
+      )
+      const monthList = monthlyRes?.data || []
+      setMonthlyData(
+        monthList.map((d) => ({
+          month: `${MONTH_NAMES[(d.month || 1) - 1]} ${d.year}`,
+          payments: d.totalPayments,
+          revenue: d.revenue,
+        }))
+      )
+    } catch {
+      // silent
+    } finally {
+      setChartsLoading(false)
+    }
+  }, [])
+
   useEffect(() => { fetchData() }, [fetchData])
   useEffect(() => { fetchStats() }, [fetchStats])
+  useEffect(() => { fetchCharts() }, [fetchCharts])
   useEffect(() => { setPage(1) }, [search, statusFilter, methodFilter, currencyFilter])
 
   useEffect(() => {
     const socket = connect()
     if (!socket) return
-    const refresh = () => { fetchData(); fetchStats() }
-    socket.on('newPayment', refresh)
+    const refresh = () => { fetchData(); fetchStats(); fetchCharts() }
+    socket.on('paymentCreated', refresh)
     socket.on('paymentStatusUpdated', refresh)
+    socket.on('paymentVerified', refresh)
+    socket.on('paymentFailed', refresh)
+    socket.on('paymentRefunded', refresh)
     return () => {
-      socket.off('newPayment', refresh)
+      socket.off('paymentCreated', refresh)
       socket.off('paymentStatusUpdated', refresh)
+      socket.off('paymentVerified', refresh)
+      socket.off('paymentFailed', refresh)
+      socket.off('paymentRefunded', refresh)
     }
-  }, [connect, fetchData, fetchStats])
+  }, [connect, fetchData, fetchStats, fetchCharts])
 
   const validateForm = () => {
     const e = {}
@@ -275,9 +337,15 @@ export default function AdminPaymentsPage() {
     setShowCreate(true)
   }
 
-  const openView = (row) => {
+  const openView = async (row) => {
     setSelected(row)
     setShowView(true)
+    try {
+      const res = await paymentService.getById(row._id)
+      if (res?.data) setSelected(res.data)
+    } catch {
+      // keep row data as-is
+    }
   }
 
   const openStatus = (row) => {
@@ -325,6 +393,68 @@ export default function AdminPaymentsPage() {
         pagination={{ page, totalPages, total, onPageChange: setPage }}
         actions={actions}
       />
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div className="rounded-card border border-border bg-card-bg shadow-md">
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <div>
+              <p className="text-sm font-semibold text-white">Payments by status</p>
+              <p className="text-xs text-text-muted">Distribution across all transactions</p>
+            </div>
+            {chartsLoading && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+          </div>
+          <div className="h-64 px-4 pb-4">
+            {!chartsLoading && statusData.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-sm text-text-muted">No data yet</div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={60} outerRadius={90} paddingAngle={4} stroke="none">
+                    {statusData.map((entry) => (
+                      <Cell key={entry.status} fill={statusChartColors[entry.status] || '#64748b'} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 12 }}
+                    labelStyle={{ color: '#fff' }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12, color: '#94a3b8' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-card border border-border bg-card-bg shadow-md">
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <div>
+              <p className="text-sm font-semibold text-white">Monthly revenue</p>
+              <p className="text-xs text-text-muted">Last 12 months</p>
+            </div>
+            {chartsLoading && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+          </div>
+          <div className="h-64 px-4 pb-4">
+            {!chartsLoading && monthlyData.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-sm text-text-muted">No data yet</div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyData} margin={{ top: 12, right: 12, left: -8, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 11 }} stroke="rgba(255,255,255,0.08)" />
+                  <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} stroke="rgba(255,255,255,0.08)" />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                    contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 12 }}
+                    labelStyle={{ color: '#fff' }}
+                  />
+                  <Bar dataKey="revenue" name="Revenue" fill="#ef4444" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="payments" name="Payments" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Create Payment Modal */}
       <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Create Payment" size="md">

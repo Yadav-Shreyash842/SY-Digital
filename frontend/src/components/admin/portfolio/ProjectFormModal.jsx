@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import { Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Modal from '../../ui/Modal'
 import Input from '../../ui/Input'
@@ -75,6 +76,8 @@ export default function ProjectFormModal({
   )
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
+  const [videoUploading, setVideoUploading] = useState(false)
+  const videoInputRef = useRef(null)
 
   const validate = () => {
     const e = {}
@@ -149,6 +152,27 @@ export default function ProjectFormModal({
     setImagePreviews((prev) => prev.filter((_, i) => i !== idx))
   }
 
+  const handleVideoUpload = async (file) => {
+    if (!file) return
+    if (!(file.type || '').startsWith('video/')) {
+      toast.error('Please select a video file')
+      return
+    }
+    setVideoUploading(true)
+    try {
+      const res = await uploadService.uploadVideo(file)
+      const data = res?.data || res || {}
+      const url = data?.url || ''
+      if (!url) throw new Error('No URL returned')
+      setFormData((prev) => ({ ...prev, video: { publicId: data?.publicId || '', url } }))
+      toast.success('Video uploaded')
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Video upload failed')
+    } finally {
+      setVideoUploading(false)
+    }
+  }
+
   const set = (field) => (e) => setFormData({ ...formData, [field]: e?.target?.value ?? e })
 
   return (
@@ -177,7 +201,31 @@ export default function ProjectFormModal({
 
         <div className="grid gap-5 md:grid-cols-2">
           <Input label="Completion Date" type="date" value={formData.completionDate} onChange={set('completionDate')} />
-          <Input label="Video URL" value={formData.video?.url || ''} onChange={(e) => setFormData({ ...formData, video: { publicId: '', url: e.target.value } })} placeholder="https://..." />
+          <div>
+            <label className="mb-2 block text-sm font-medium text-text-secondary">Video URL</label>
+            <div className="flex gap-2">
+              <Input value={formData.video?.url || ''} onChange={(e) => setFormData({ ...formData, video: { publicId: '', url: e.target.value } })} placeholder="https://..." />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => videoInputRef.current?.click()}
+                disabled={videoUploading}
+                className="!h-11 shrink-0 !px-4"
+              >
+                {videoUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Upload'}
+              </Button>
+            </div>
+            <input
+              ref={videoInputRef}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={(e) => {
+                handleVideoUpload(e.target.files?.[0])
+                e.target.value = ''
+              }}
+            />
+          </div>
         </div>
 
         <div>

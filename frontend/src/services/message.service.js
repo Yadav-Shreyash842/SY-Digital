@@ -33,6 +33,10 @@ export const messageService = {
     const res = await apiClient.get('/api/messages/dashboard/recent')
     return res?.data
   },
+  monthlyAnalytics: async () => {
+    const res = await apiClient.get('/api/messages/dashboard/monthly-analytics')
+    return res?.data
+  },
 }
 
 export default messageService

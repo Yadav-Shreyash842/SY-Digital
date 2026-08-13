@@ -32,13 +32,17 @@ export default function ClientDashboard() {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const res = await clientService.dashboard()
-        const data = res?.data || {}
+        const [dashboardRes, requestsRes] = await Promise.all([
+          clientService.dashboard(),
+          clientService.projectRequests(),
+        ])
+        const data = dashboardRes?.data || {}
         setProjects(data.projects || [])
         setMeetings(data.meetings || [])
         setPayments(data.payments || [])
         setMessages(data.messages || [])
-        setProjectRequests(data.projectRequests || [])
+        const requests = requestsRes?.data || []
+        setProjectRequests(requests.length ? requests : (data.projectRequests || []))
       } catch {
         toast.error('Failed to load dashboard data')
       } finally {
@@ -54,13 +58,17 @@ export default function ClientDashboard() {
     if (!socket) return
 
     const handleUpdate = () => {
-      clientService.dashboard().then((res) => {
-        const data = res?.data || {}
+      Promise.all([
+        clientService.dashboard(),
+        clientService.projectRequests(),
+      ]).then(([dashboardRes, requestsRes]) => {
+        const data = dashboardRes?.data || {}
         setProjects(data.projects || [])
         setMeetings(data.meetings || [])
         setPayments(data.payments || [])
         setMessages(data.messages || [])
-        setProjectRequests(data.projectRequests || [])
+        const requests = requestsRes?.data || []
+        setProjectRequests(requests.length ? requests : (data.projectRequests || []))
       }).catch(() => {})
     }
 

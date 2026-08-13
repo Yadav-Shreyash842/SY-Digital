@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const DEV_HOST = window.location.hostname || 'localhost'
+const API_URL = import.meta.env.VITE_API_URL || `http://${DEV_HOST}:3000`
 
 let lastFailure = 0
 const BACKOFF_MS = 60 * 1000

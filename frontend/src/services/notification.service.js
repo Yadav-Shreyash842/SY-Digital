@@ -25,6 +25,14 @@ export const notificationService = {
     const res = await apiClient.get('/api/notifications/dashboard/stats')
     return res?.data
   },
+  typeAnalytics: async () => {
+    const res = await apiClient.get('/api/notifications/dashboard/type-analytics')
+    return res?.data
+  },
+  recent: async () => {
+    const res = await apiClient.get('/api/notifications/dashboard/recent')
+    return res?.data
+  },
 }
 
 export default notificationService

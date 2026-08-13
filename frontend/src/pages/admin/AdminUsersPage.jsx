@@ -131,9 +131,15 @@ export default function AdminUsersPage() {
     setShowEdit(true)
   }
 
-  const openView = (row) => {
+  const openView = async (row) => {
     setSelected(row)
     setShowView(true)
+    try {
+      const res = await userService.get(row._id)
+      if (res?.data) setSelected(res.data)
+    } catch {
+      // keep row data as-is
+    }
   }
 
   const openDelete = (row) => {

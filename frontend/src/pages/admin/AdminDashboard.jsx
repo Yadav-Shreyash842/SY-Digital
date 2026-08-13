@@ -28,6 +28,8 @@ import toast from 'react-hot-toast'
 import Badge from '../../components/ui/Badge'
 import dashboardService from '../../services/dashboard.service'
 import projectRequestService from '../../services/projectRequest.service'
+import messageService from '../../services/message.service'
+import notificationService from '../../services/notification.service'
 import useSocket from '../../hooks/useSocket'
 
 const Skeleton = ({ className }) => (
@@ -97,6 +99,9 @@ export default function AdminDashboard() {
   const [projectRequests, setProjectRequests] = useState([])
   const [loading, setLoading] = useState(true)
   const [approvingId, setApprovingId] = useState(null)
+  const [messageStats, setMessageStats] = useState(null)
+  const [recentMessages, setRecentMessages] = useState([])
+  const [recentNotifications, setRecentNotifications] = useState([])
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true)
@@ -134,23 +139,59 @@ export default function AdminDashboard() {
     }
   }, [])
 
+  const fetchMessages = useCallback(async () => {
+    try {
+      const [statsRes, recentRes] = await Promise.all([
+        messageService.stats(),
+        messageService.recentMessages(),
+      ])
+      if (statsRes?.data) setMessageStats(statsRes.data)
+      if (recentRes?.data) setRecentMessages(recentRes.data)
+    } catch {
+      // silent
+    }
+  }, [])
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await notificationService.recent()
+      if (res?.data) setRecentNotifications(res.data)
+    } catch {
+      // silent
+    }
+  }, [])
+
   const fetchAll = useCallback(async () => {
-    await Promise.all([fetchDashboard(), fetchProjectRequests()])
-  }, [fetchDashboard, fetchProjectRequests])
+    await Promise.all([fetchDashboard(), fetchProjectRequests(), fetchMessages(), fetchNotifications()])
+  }, [fetchDashboard, fetchProjectRequests, fetchMessages, fetchNotifications])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
   useEffect(() => {
     const socket = connect()
     if (!socket) return
-    const refresh = () => { fetchProjectRequests() }
+    const refresh = () => { fetchProjectRequests(); fetchMessages(); fetchNotifications() }
     socket.on('newProjectRequest', refresh)
     socket.on('projectRequestUpdated', refresh)
+    socket.on('newMessage', refresh)
+    socket.on('messageStatusUpdated', refresh)
+    socket.on('messageReplied', refresh)
+    socket.on('messageDeleted', refresh)
+    socket.on('newNotification', refresh)
+    socket.on('allNotificationsRead', refresh)
+    socket.on('notificationDeleted', refresh)
     return () => {
       socket.off('newProjectRequest', refresh)
       socket.off('projectRequestUpdated', refresh)
+      socket.off('newMessage', refresh)
+      socket.off('messageStatusUpdated', refresh)
+      socket.off('messageReplied', refresh)
+      socket.off('messageDeleted', refresh)
+      socket.off('newNotification', refresh)
+      socket.off('allNotificationsRead', refresh)
+      socket.off('notificationDeleted', refresh)
     }
-  }, [connect, fetchProjectRequests])
+  }, [connect, fetchProjectRequests, fetchMessages, fetchNotifications])
 
   const handleQuickApprove = async (req) => {
     setApprovingId(req._id)
@@ -564,6 +605,79 @@ export default function AdminDashboard() {
           </div>
         </motion.section>
       </div>
+
+      <motion.section
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.32, ease: 'easeInOut' }}
+        className="rounded-[28px] border border-white/10 bg-white/5 p-4 sm:p-6 shadow-[0_24px_80px_rgba(0,0,0,0.24)] backdrop-blur-xl"
+      >
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Inbox</p>
+            <h2 className="text-xl font-semibold sm:text-2xl text-white">Recent messages</h2>
+          </div>
+          {messageStats && (
+            <span className="rounded-full bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.18em] text-slate-300">
+              {messageStats.unreadMessages ?? 0} unread / {messageStats.totalMessages ?? 0} total
+            </span>
+          )}
+        </div>
+        <div className="space-y-4">
+          {recentMessages.length > 0 ? (
+            recentMessages.map((msg) => (
+              <div key={msg._id} className="rounded-[24px] border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-semibold text-white">{msg.name}</p>
+                  <Badge variant={msg.status === 'unread' ? 'warning' : 'default'}>{msg.status}</Badge>
+                </div>
+                <p className="mt-1 text-sm font-medium text-slate-200">{msg.subject}</p>
+                <p className="mt-1 line-clamp-2 text-sm text-slate-400">{msg.message}</p>
+                <p className="mt-2 text-xs text-slate-500">{timeAgo(msg.createdAt)}</p>
+              </div>
+            ))
+          ) : (
+            <p className="py-8 text-center text-sm text-slate-500">No messages</p>
+          )}
+        </div>
+      </motion.section>
+
+      <motion.section
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.36, ease: 'easeInOut' }}
+        className="rounded-[28px] border border-white/10 bg-white/5 p-4 sm:p-6 shadow-[0_24px_80px_rgba(0,0,0,0.24)] backdrop-blur-xl"
+      >
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Notifications</p>
+            <h2 className="text-xl font-semibold sm:text-2xl text-white">Recent notifications</h2>
+          </div>
+          {recentNotifications.some((n) => !n.isRead) && (
+            <span className="rounded-full bg-warning/20 px-3 py-1 text-xs uppercase tracking-[0.18em] text-warning">
+              {recentNotifications.filter((n) => !n.isRead).length} unread
+            </span>
+          )}
+        </div>
+        <div className="space-y-4">
+          {recentNotifications.length > 0 ? (
+            recentNotifications.map((n) => (
+              <div key={n._id} className="rounded-[24px] border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-semibold text-white">{n.title}</p>
+                  <Badge variant={n.isRead ? 'success' : 'warning'}>
+                    {n.type?.charAt(0).toUpperCase() + n.type?.slice(1)}
+                  </Badge>
+                </div>
+                <p className="mt-1 line-clamp-2 text-sm text-slate-400">{n.message}</p>
+                <p className="mt-2 text-xs text-slate-500">{timeAgo(n.createdAt)}</p>
+              </div>
+            ))
+          ) : (
+            <p className="py-8 text-center text-sm text-slate-500">No notifications</p>
+          )}
+        </div>
+      </motion.section>
     </div>
   )
 }

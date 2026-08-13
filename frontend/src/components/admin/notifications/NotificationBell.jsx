@@ -133,7 +133,7 @@ export default function NotificationBell() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute right-0 top-14 z-50 w-[360px] max-w-[90vw] overflow-hidden rounded-xl border border-border bg-sidebar-bg shadow-2xl"
+            className="fixed inset-x-3 top-16 z-50 overflow-hidden rounded-xl border border-border bg-sidebar-bg shadow-2xl lg:absolute lg:inset-x-auto lg:right-0 lg:top-14 lg:w-[360px]"
           >
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <p className="text-sm font-semibold text-white">Notifications</p>
@@ -148,7 +148,7 @@ export default function NotificationBell() {
               </button>
             </div>
 
-            <div className="max-h-[360px] overflow-y-auto">
+            <div className="max-h-[min(360px,40vh)] overflow-y-auto">
               {items.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm text-text-muted">No notifications yet.</p>
               ) : (

@@ -47,6 +47,7 @@ export default function AdminReviewsPage() {
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [viewTarget, setViewTarget] = useState(null)
   const [formLoading, setFormLoading] = useState(false)
+  const [ratingData, setRatingData] = useState(null)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -80,14 +81,34 @@ export default function AdminReviewsPage() {
     }
   }, [])
 
+  const fetchRatingAnalytics = useCallback(async () => {
+    try {
+      const res = await reviewService.ratingAnalytics()
+      const list = res?.data || []
+      const map = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+      list.forEach((d) => {
+        if (d.rating >= 1 && d.rating <= 5) map[d.rating] = d.total
+      })
+      setRatingData(
+        Object.entries(map)
+          .map(([name, value]) => ({ name: `${name} Star`, value }))
+          .filter((d) => d.value > 0)
+          .sort((a, b) => parseInt(b.name) - parseInt(a.name))
+      )
+    } catch {
+      // silent
+    }
+  }, [])
+
   useEffect(() => { fetchData() }, [fetchData])
   useEffect(() => { fetchStats() }, [fetchStats])
+  useEffect(() => { fetchRatingAnalytics() }, [fetchRatingAnalytics])
   useEffect(() => { setPage(1) }, [search, statusFilter, ratingFilter, featuredFilter])
 
   useEffect(() => {
     const socket = connect()
     if (!socket) return
-    const refresh = () => { fetchData(); fetchStats() }
+    const refresh = () => { fetchData(); fetchStats(); fetchRatingAnalytics() }
     socket.on('reviewApproved', refresh)
     socket.on('reviewRejected', refresh)
     socket.on('reviewUpdated', refresh)
@@ -98,9 +119,10 @@ export default function AdminReviewsPage() {
       socket.off('reviewUpdated', refresh)
       socket.off('reviewDeleted', refresh)
     }
-  }, [connect, fetchData, fetchStats])
+  }, [connect, fetchData, fetchStats, fetchRatingAnalytics])
 
   const ratingDistribution = useMemo(() => {
+    if (ratingData && ratingData.length) return ratingData
     const map = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
     data.forEach((r) => {
       const rating = r.rating
@@ -110,7 +132,18 @@ export default function AdminReviewsPage() {
       .map(([name, value]) => ({ name: `${name} Star`, value }))
       .filter((d) => d.value > 0)
       .sort((a, b) => parseInt(b.name) - parseInt(a.name))
-  }, [data])
+  }, [ratingData, data])
+
+  const handleView = async (r) => {
+    setViewTarget(r)
+    setShowView(true)
+    try {
+      const res = await reviewService.getById(r._id)
+      if (res?.data) setViewTarget(res.data)
+    } catch {
+      // keep row data as-is
+    }
+  }
 
   const handleCreate = async (payload) => {
     setFormLoading(true)
@@ -306,7 +339,7 @@ export default function AdminReviewsPage() {
             loading={loading}
             selectedId={selectedReview?._id}
             onSelect={setSelectedReview}
-            onView={(r) => { setViewTarget(r); setShowView(true) }}
+            onView={handleView}
             onEdit={(r) => { setEditData(r); setShowEdit(true) }}
             onApprove={handleApprove}
             onReject={handleReject}

@@ -11,6 +11,15 @@ import {
   ArrowLeft,
   CheckCheck,
 } from 'lucide-react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from 'recharts'
 import toast from 'react-hot-toast'
 import Avatar from '../../components/ui/Avatar'
 import Badge from '../../components/ui/Badge'
@@ -25,6 +34,8 @@ const statusVariant = {
   replied: 'info',
   archived: 'default',
 }
+
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 function timeAgo(dateStr) {
   if (!dateStr) return ''
@@ -128,6 +139,8 @@ export default function AdminMessagesPage() {
   const [sending, setSending] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
   const [mobileShowChat, setMobileShowChat] = useState(false)
+  const [monthlyData, setMonthlyData] = useState([])
+  const [monthlyLoading, setMonthlyLoading] = useState(true)
 
   const fetchMessages = useCallback(async () => {
     setLoading(true)
@@ -163,6 +176,21 @@ export default function AdminMessagesPage() {
   }, [])
 
   useEffect(() => { fetchMessages() }, [fetchMessages])
+
+  useEffect(() => {
+    messageService.monthlyAnalytics()
+      .then((res) => {
+        const list = res?.data || []
+        setMonthlyData(
+          list.map((d) => ({
+            month: `${MONTH_NAMES[(d.month || 1) - 1]} ${d.year}`,
+            messages: d.totalMessages,
+          }))
+        )
+      })
+      .catch(() => {})
+      .finally(() => setMonthlyLoading(false))
+  }, [])
 
   useEffect(() => {
     serviceService.list({ limit: 100 }).then((res) => {
@@ -405,10 +433,43 @@ export default function AdminMessagesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.05 }}
+        className="rounded-card border border-border bg-card-bg shadow-md"
+      >
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <div>
+            <p className="text-sm font-semibold text-white">Messages per month</p>
+            <p className="text-xs text-text-muted">12-month message volume</p>
+          </div>
+          {monthlyLoading && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+        </div>
+        <div className="h-56 px-4 pb-4">
+          {!monthlyLoading && monthlyData.length === 0 ? (
+            <div className="flex h-full items-center justify-center text-sm text-text-muted">No data yet</div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyData} margin={{ top: 12, right: 12, left: -18, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 11 }} stroke="rgba(255,255,255,0.08)" />
+                <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} stroke="rgba(255,255,255,0.08)" allowDecimals={false} />
+                <Tooltip
+                  cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                  contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 12 }}
+                  labelStyle={{ color: '#fff' }}
+                />
+                <Bar dataKey="messages" name="Messages" fill="#ef4444" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.05 }}
         className="overflow-hidden rounded-card border border-border bg-card-bg shadow-md"
       >
         <div className="flex h-[calc(100vh-220px)] min-h-[500px]">
-          {/* Left Panel - Conversation List */}
           <div className={`w-full flex-shrink-0 border-r border-border md:w-[380px] ${mobileShowChat ? 'hidden md:flex' : 'flex'} flex-col`}>
             <div className="border-b border-border p-4">
               <div className="relative mb-3">

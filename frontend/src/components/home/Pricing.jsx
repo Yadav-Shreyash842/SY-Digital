@@ -39,6 +39,7 @@ export default function Pricing() {
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: 'easeInOut' }}
         className="mb-16 text-center"
+        
       >
         <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-accent-purple">
           Pricing

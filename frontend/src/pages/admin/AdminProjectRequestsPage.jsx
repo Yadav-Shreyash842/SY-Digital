@@ -98,7 +98,16 @@ export default function AdminProjectRequestsPage() {
     }
   }, [connect, fetchData])
 
-  const handleView = (row) => { setSelected(row); setShowView(true) }
+  const handleView = async (row) => {
+    setSelected(row)
+    setShowView(true)
+    try {
+      const res = await projectRequestService.getById(row._id)
+      if (res?.data) setSelected(res.data)
+    } catch {
+      // keep row data as-is
+    }
+  }
 
   const handleApprove = async (row) => {
     setActionLoading(true)

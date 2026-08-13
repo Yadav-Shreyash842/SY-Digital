@@ -1,7 +1,8 @@
 import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000'
+const DEV_HOST = window.location.hostname || 'localhost'
+const API_URL = import.meta.env.VITE_API_URL || `http://${DEV_HOST}:3000`
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || `http://${DEV_HOST}:3000`
 
 const apiClient = axios.create({
   baseURL: API_URL,

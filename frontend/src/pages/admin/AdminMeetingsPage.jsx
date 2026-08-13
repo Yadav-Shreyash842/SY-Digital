@@ -7,6 +7,8 @@ import Modal from '../../components/ui/Modal'
 import Badge from '../../components/ui/Badge'
 import Input from '../../components/ui/Input'
 import Textarea from '../../components/ui/Textarea'
+import Select from '../../components/ui/Select'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import Timeline from '../../components/ui/Timeline'
 import useSocket from '../../hooks/useSocket'
 import meetingService from '../../services/meeting.service'
@@ -14,7 +16,7 @@ import MeetingStatsCards from '../../components/admin/meetings/MeetingStatsCards
 import MeetingFilterBar from '../../components/admin/meetings/MeetingFilterBar'
 import MeetingDataTable from '../../components/admin/meetings/MeetingDataTable'
 import MeetingRightPanel from '../../components/admin/meetings/MeetingRightPanel'
-import { Clock, CheckCircle, XCircle, Ban, CalendarClock } from 'lucide-react'
+import { Clock, CheckCircle, XCircle, Ban, CalendarClock, Pencil, Trash2 } from 'lucide-react'
 
 const statusVariant = {
   pending: 'warning',
@@ -56,8 +58,19 @@ export default function AdminMeetingsPage() {
   const [showReschedule, setShowReschedule] = useState(false)
   const [showCancel, setShowCancel] = useState(false)
   const [showStatusConfirm, setShowStatusConfirm] = useState(false)
+  const [showEdit, setShowEdit] = useState(false)
+  const [showDelete, setShowDelete] = useState(false)
   const [selected, setSelected] = useState(null)
   const [formLoading, setFormLoading] = useState(false)
+
+  const [editData, setEditData] = useState({
+    meetingType: 'online',
+    meetingDate: '',
+    meetingTime: '',
+    duration: 30,
+    projectRequirements: '',
+    budget: '',
+  })
 
   const [rescheduleData, setRescheduleData] = useState({ meetingDate: '', meetingTime: '' })
   const [cancelReason, setCancelReason] = useState('')
@@ -221,6 +234,69 @@ export default function AdminMeetingsPage() {
     }
   }
 
+  const openEdit = (row) => {
+    setSelected(row)
+    setEditData({
+      meetingType: row.meetingType || 'online',
+      meetingDate: row.meetingDate ? new Date(row.meetingDate).toISOString().split('T')[0] : '',
+      meetingTime: row.meetingTime || '',
+      duration: row.duration || 30,
+      projectRequirements: row.projectRequirements || '',
+      budget: row.budget ? String(row.budget) : '',
+    })
+    setShowEdit(true)
+  }
+
+  const handleEdit = async () => {
+    if (!editData.meetingDate || !editData.meetingTime) {
+      toast.error('Please select date and time')
+      return
+    }
+    setFormLoading(true)
+    try {
+      await meetingService.update(selected._id, {
+        meetingType: editData.meetingType,
+        meetingDate: editData.meetingDate,
+        meetingTime: editData.meetingTime,
+        duration: Number(editData.duration) || 30,
+        projectRequirements: editData.projectRequirements,
+        budget: editData.budget ? Number(editData.budget) : 0,
+      })
+      toast.success('Meeting updated')
+      setShowEdit(false)
+      fetchData()
+      if (showView) openView(selected)
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to update meeting')
+    } finally {
+      setFormLoading(false)
+    }
+  }
+
+  const openDelete = (row) => {
+    setSelected(row)
+    setShowDelete(true)
+  }
+
+  const handleDelete = async () => {
+    if (!selected) return
+    setFormLoading(true)
+    try {
+      await meetingService.remove(selected._id)
+      toast.success('Meeting deleted')
+      setShowDelete(false)
+      setSelected(null)
+      setSelectedMeeting(null)
+      setShowView(false)
+      fetchData()
+      fetchStats()
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to delete meeting')
+    } finally {
+      setFormLoading(false)
+    }
+  }
+
   const timelineItems = meetingHistory.map((h) => ({
     date: formatDate(h.createdAt),
     title: h.action?.charAt(0).toUpperCase() + h.action?.slice(1),
@@ -373,6 +449,14 @@ export default function AdminMeetingsPage() {
                   <Button variant="danger" onClick={() => openCancel(selected)}>Cancel</Button>
                 </>
               )}
+              <Button variant="outline" onClick={() => openEdit(selected)}>
+                <Pencil strokeWidth={1.75} className="mr-1.5 h-4 w-4" />
+                Edit
+              </Button>
+              <Button variant="danger" onClick={() => openDelete(selected)}>
+                <Trash2 strokeWidth={1.75} className="mr-1.5 h-4 w-4" />
+                Delete
+              </Button>
               <Button variant="outline" onClick={() => setShowView(false)}>Close</Button>
             </div>
           </div>
@@ -442,6 +526,73 @@ export default function AdminMeetingsPage() {
           </div>
         </div>
       </Modal>
+
+      {/* Edit Meeting Modal */}
+      <Modal isOpen={showEdit} onClose={() => setShowEdit(false)} title="Edit Meeting" size="md">
+        <div className="space-y-4">
+          <Select
+            label="Meeting Type"
+            options={[
+              { value: 'online', label: 'Online' },
+              { value: 'offline', label: 'In Person' },
+            ]}
+            value={editData.meetingType}
+            onChange={(v) => setEditData({ ...editData, meetingType: v })}
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Date"
+              type="date"
+              value={editData.meetingDate}
+              onChange={(e) => setEditData({ ...editData, meetingDate: e.target.value })}
+            />
+            <Input
+              label="Time"
+              type="time"
+              value={editData.meetingTime}
+              onChange={(e) => setEditData({ ...editData, meetingTime: e.target.value })}
+            />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Duration (minutes)"
+              type="number"
+              min="15"
+              step="5"
+              value={editData.duration}
+              onChange={(e) => setEditData({ ...editData, duration: e.target.value })}
+            />
+            <Input
+              label="Budget (INR)"
+              type="number"
+              min="0"
+              value={editData.budget}
+              onChange={(e) => setEditData({ ...editData, budget: e.target.value })}
+            />
+          </div>
+          <Textarea
+            label="Project Requirements"
+            placeholder="Update the client's requirements..."
+            rows={3}
+            value={editData.projectRequirements}
+            onChange={(e) => setEditData({ ...editData, projectRequirements: e.target.value })}
+          />
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" onClick={() => setShowEdit(false)}>Cancel</Button>
+            <Button variant="primary" onClick={handleEdit} loading={formLoading}>Save Changes</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Meeting Confirmation */}
+      <ConfirmDialog
+        isOpen={showDelete}
+        onClose={() => setShowDelete(false)}
+        onConfirm={handleDelete}
+        title="Delete Meeting"
+        message={`Are you sure you want to delete the meeting with "${selected?.name}"? This action cannot be undone.`}
+        variant="danger"
+      />
     </div>
   )
 }
